@@ -4,6 +4,7 @@ const redlight = "#ff8292";
 const bluelight = "#c587ff";
 const genDisable = "#333333";
 const caracteres = /^[a-zA-Z]$/;
+const caracteresInvalidos = /^[WwYyKk]$/
 
 let maxPoints = 15;
 let maxTime = 3;
@@ -35,68 +36,83 @@ function resetRound() {
 }
 
 function novaLetra(box) {
+    travarInput();
     caixaAtual = box;
     let cBox = document.getElementById(`char${caixaAtual}`);
 
-    if (!caracteres.test(cBox.value) || (caixaAtual == 2 && caracteres.test())) {
+    if (!caracteres.test(cBox.value) || (caixaAtual < 3 && caracteresInvalidos.test(cBox.value))) {
         document.getElementById(`char-valido`).style.display = 'flex';
         cBox.value = "";
+        cBox.disabled = false;
         return;
     }
-    
-    travarInput();
-
     clearTimeout(turnTimer);
-
     let nBox = document.getElementById(`char${caixaAtual+1}`);
     cBox.disabled = true;
     cBox.style.boxShadow = `none`
-
     palavra += cBox.value.toLowerCase();
-    verificarPalavra();
-
-    nBox.style.borderColor = jgdrAtual === "vermelho" ? blue : red;
-    nBox.style.boxShadow = `0px 0px 1.5dvw ${jgdrAtual === "vermelho" ? blue : red}`
-    nBox.disabled = false;
-    nBox.focus();
-    jgdrAtual = jgdrAtual === "vermelho" ? "azul" : "vermelho";
+    
+    if (caixaAtual == 8) verificarPalavra();
+    
+    else {
+        
+        verificarPalavra().then(() => {
+            nBox.style.borderColor = jgdrAtual === "vermelho" ? blue : red;
+            nBox.style.boxShadow = `0px 0px 1.5dvw ${jgdrAtual === "vermelho" ? blue : red}`
+            nBox.disabled = false;
+            nBox.focus();
+            jgdrAtual = jgdrAtual === "vermelho" ? "azul" : "vermelho";
+        });
+    }
 }
 
-async function verificarPalavra() {  
-    if (palavra.length >  2) {
-        try {
-            const resposta = await fetch(`https://api.dicionario-aberto.net/prefix/${palavra}`);
-            const palavras = await resposta.json();
-    
-            if (palavras.length == 0) vitoriaRound(1, jgdrAtual === "vermelho" ? "AZUL" : "VERMELHO", palavra)
-        } catch (erro) {
-            console.error(erro);
-        }
-    }
+async function verificarPalavra() {
+    const variacoes = gerarVariacoes(palavra);
+    let prefixoInvalido = false;
 
     if (palavra.length > 4) {
-        try {
-            const resposta = await fetch(`https://api.dicionario-aberto.net/word/${palavra}`);
-            const dados = await resposta.json();
-      
-            if (!dados.length) {
+        for (let word of variacoes) {
+            try {
+                const resposta = await fetch(`https://api.dicionario-aberto.net/word/${word}`);
+                const dados = await resposta.json();                  
+                const parser = new DOMParser();
+                const xmlDoc = parser.parseFromString(dados[0].xml, "application/xml");
+                const definicoes = xmlDoc.getElementsByTagName("def");
+          
+                if (definicoes.length === 0) return Promise.resolve();
+                else {
+                    vitoriaRound(2, jgdrAtual === "vermelho" ? "AZUL" : "VERMELHO");
+                    return Promise.resolve();
+                }
+            } catch (error) {
+                  console.error(error);
             }
-              
-            const parser = new DOMParser();
-            const xmlDoc = parser.parseFromString(dados[0].xml, "application/xml");
-            const definicoes = xmlDoc.getElementsByTagName("def");
-      
-            if (definicoes.length === 0) return
-            
-            else vitoriaRound(2, jgdrAtual === "vermelho" ? "AZUL" : "VERMELHO", palavra)
-      
-        } catch (error) {
-              console.error(error);
+        }
+    } else if (palavra.length > 2) {
+        prefixoInvalido = true;
+        for (let word of variacoes) {
+            try {
+                const resposta = await fetch(`https://api.dicionario-aberto.net/prefix/${word}`);
+                const palavras = await resposta.json();
+        
+                if (palavras.length > 0) {
+                    prefixoInvalido = false;
+                    break;
+                }
+            } catch (erro) {
+                console.error(erro);
+            }
         }
     }
+
+    if (prefixoInvalido) {
+        vitoriaRound(1, jgdrAtual === "vermelho" ? "AZUL" : "VERMELHO");
+    }
+    return Promise.resolve();
 }
 
-function vitoriaRound(caso, vencedor, palavra) {
+
+function vitoriaRound(caso, vencedor) {
     travarInput();
     let pontosRodada = 9 - caixaAtual;
     let detalhes = document.getElementById("detalhes-vitoria");
@@ -165,4 +181,52 @@ function startTurnTimer() {
 
 function timeOutAction() {
     vitoriaRound(3, jgdrAtual === "vermelho" ? "AZUL" : "VERMELHO", palavra);
+}
+
+function gerarVariacoes(palavra) {
+    const mapeamento = {
+        'a': ['a', 'á', 'â', 'ã'],
+        'e': ['e', 'é', 'ê'],
+        'i': ['i', 'í'],
+        'o': ['o', 'ó', 'ô', 'õ'],
+        'u': ['u', 'ú', 'ü'],
+        'c': ['c', 'ç']
+    };
+
+    function combinar(subPalavra, indice, acentoUsado) {
+        if (indice === palavra.length) {
+            return [subPalavra];
+        }
+
+        const char = palavra[indice];
+        const alternativas = mapeamento[char] || [char];
+        let combinacoes = [];
+
+        alternativas.forEach(letra => {
+            let isAcentuada = false;
+            if (char === 'a' && (letra === 'á' || letra === 'â')) {
+                isAcentuada = true;
+            } else if (char === 'e' && (letra === 'é' || letra === 'ê')) {
+                isAcentuada = true;
+            } else if (char === 'i' && letra === 'í') {
+                isAcentuada = true;
+            } else if (char === 'o' && (letra === 'ó' || letra === 'ô')) {
+                isAcentuada = true;
+            } else if (char === 'u' && letra === 'ú') {
+                isAcentuada = true;
+            }
+            if (acentoUsado && isAcentuada) {
+                return;
+            }
+            combinacoes = combinacoes.concat(combinar(
+                subPalavra + letra,
+                indice + 1,
+                acentoUsado || isAcentuada
+            ));
+        });
+
+        return combinacoes;
+    }
+
+    return combinar('', 0, false);
 }
