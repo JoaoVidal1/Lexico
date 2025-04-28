@@ -4,7 +4,7 @@ const redlight = "#ff8292";
 const bluelight = "#c587ff";
 const genDisable = "#333333";
 const caracteres = /^[a-zA-Z]$/;
-const caracteresInvalidos = /^[WwYyKk]$/
+const caracteresInvalidos = /^[WwYyKkXx]$/
 
 let maxPoints = 15;
 let maxTime = 3;
@@ -55,7 +55,6 @@ function novaLetra(box) {
     if (caixaAtual == 8) verificarPalavra();
     
     else {
-        
         verificarPalavra().then(() => {
             nBox.style.borderColor = jgdrAtual === "vermelho" ? blue : red;
             nBox.style.boxShadow = `0px 0px 1.5dvw ${jgdrAtual === "vermelho" ? blue : red}`
@@ -70,49 +69,48 @@ async function verificarPalavra() {
     const variacoes = gerarVariacoes(palavra);
     let prefixoInvalido = false;
 
-    if (palavra.length > 4) {
+    async function processarVariacoes(urlBase) {
         for (let word of variacoes) {
             try {
-                const resposta = await fetch(`https://api.dicionario-aberto.net/word/${word}`);
-                const dados = await resposta.json();                  
-                const parser = new DOMParser();
-                const xmlDoc = parser.parseFromString(dados[0].xml, "application/xml");
-                const definicoes = xmlDoc.getElementsByTagName("def");
-          
-                if (definicoes.length === 0) return Promise.resolve();
-                else {
-                    vitoriaRound(2, jgdrAtual === "vermelho" ? "AZUL" : "VERMELHO");
-                    return Promise.resolve();
+                const resposta = await fetch(`${urlBase}/${word}`);
+                const dados = await resposta.json();
+
+                if (urlBase.includes("word")) {
+                    const parser = new DOMParser();
+                    const xmlDoc = parser.parseFromString(dados[0]?.xml || "", "application/xml");
+                    const definicoes = xmlDoc.getElementsByTagName("def");
+
+                    if (definicoes.length === 0) return true;
+                    else vitoriaRound(2, jgdrAtual === "vermelho" ? "AZUL" : "VERMELHO").then(() => {});
+                    return false;
+                } else if (urlBase.includes("prefix")) {
+                    if (dados.length > 0) {
+                        prefixoInvalido = false;
+                        break;
+                    }
                 }
             } catch (error) {
-                  console.error(error);
+                console.error(error);
             }
         }
+        return false;
+    }
+
+    if (palavra.length > 4) {
+        const resultado = await processarVariacoes("https://api.dicionario-aberto.net/word");
+        if (resultado) return;
     } else if (palavra.length > 2) {
         prefixoInvalido = true;
-        for (let word of variacoes) {
-            try {
-                const resposta = await fetch(`https://api.dicionario-aberto.net/prefix/${word}`);
-                const palavras = await resposta.json();
-        
-                if (palavras.length > 0) {
-                    prefixoInvalido = false;
-                    break;
-                }
-            } catch (erro) {
-                console.error(erro);
-            }
-        }
+        await processarVariacoes("https://api.dicionario-aberto.net/prefix");
     }
 
     if (prefixoInvalido) {
-        vitoriaRound(1, jgdrAtual === "vermelho" ? "AZUL" : "VERMELHO");
+        vitoriaRound(1, jgdrAtual === "vermelho" ? "AZUL" : "VERMELHO").then(() => {});
     }
-    return Promise.resolve();
 }
 
 
-function vitoriaRound(caso, vencedor) {
+async function vitoriaRound(caso, vencedor) {
     travarInput();
     let pontosRodada = 9 - caixaAtual;
     let detalhes = document.getElementById("detalhes-vitoria");
@@ -200,32 +198,14 @@ function gerarVariacoes(palavra) {
 
         const char = palavra[indice];
         const alternativas = mapeamento[char] || [char];
-        let combinacoes = [];
 
-        alternativas.forEach(letra => {
-            let isAcentuada = false;
-            if (char === 'a' && (letra === 'á' || letra === 'â')) {
-                isAcentuada = true;
-            } else if (char === 'e' && (letra === 'é' || letra === 'ê')) {
-                isAcentuada = true;
-            } else if (char === 'i' && letra === 'í') {
-                isAcentuada = true;
-            } else if (char === 'o' && (letra === 'ó' || letra === 'ô')) {
-                isAcentuada = true;
-            } else if (char === 'u' && letra === 'ú') {
-                isAcentuada = true;
-            }
+        return alternativas.flatMap(letra => {
+            const isAcentuada = mapeamento[char]?.includes(letra) && letra !== char;
             if (acentoUsado && isAcentuada) {
-                return;
+                return [];
             }
-            combinacoes = combinacoes.concat(combinar(
-                subPalavra + letra,
-                indice + 1,
-                acentoUsado || isAcentuada
-            ));
+            return combinar(subPalavra + letra, indice + 1, acentoUsado || isAcentuada);
         });
-
-        return combinacoes;
     }
 
     return combinar('', 0, false);
