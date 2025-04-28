@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Verificar Prefixo - Dicionário Aberto</title>
+</head>
+<body>
+  <h2>Verificar se palavras começam com um prefixo</h2>
+
+  <input type="text" id="palavra" placeholder="Digite um prefixo (ex: auto)" minlength="3">
+  <button onclick="verificarPrefixo()">Buscar Prefixo</button>
+  <button onclick="buscarDefinicao()">Buscar Palavra</button>
+  <div id="resultado" style="margin-top: 20px;"></div>
+
+  <script>
+    async function buscarDefinicao() {
+      const palavra = document.getElementById("palavra").value.toLowerCase().trim();
+      const resultadoDiv = document.getElementById("resultado");
+      resultadoDiv.innerHTML = "Buscando...";
+
+      try {
+        const resposta = await fetch(`https://api.dicionario-aberto.net/word/${palavra}`);
+        const dados = await resposta.json();
+
+        if (!dados.length) {
+          resultadoDiv.innerHTML = "Palavra não encontrada.";
+          return;
+        }
+        
+        const parser = new DOMParser();
+        const xmlDoc = parser.parseFromString(dados[0].xml, "application/xml");
+        const definicoes = xmlDoc.getElementsByTagName("def");
+
+        if (definicoes.length === 0) {
+          resultadoDiv.innerHTML = "Definição não encontrada no XML.";
+          return;
+        }
+
+        resultadoDiv.innerHTML = "<strong>Definições:</strong><ul>" +
+          Array.from(definicoes).map(def => `<li>${def.textContent}</li>`).join('') +
+          "</ul>";
+
+      } catch (error) {
+        resultadoDiv.innerHTML = "Erro ao buscar definição.";
+        console.error(error);
+      }
+    }
+
+    async function verificarPrefixo() {
+      const prefixo = document.getElementById("palavra").value.toLowerCase().trim();
+      const resultadoDiv = document.getElementById("resultado");
+
+      if (prefixo.length < 3) {
+        resultadoDiv.innerHTML = "Por favor, digite um prefixo com ao menos 3 letras."
+        return
+      }
+
+      if (!prefixo) {
+        resultadoDiv.innerHTML = "Por favor, digite um prefixo.";
+        return;
+      }
+
+      resultadoDiv.innerHTML = "Buscando...";
+
+      try {
+        const resposta = await fetch(`https://api.dicionario-aberto.net/prefix/${prefixo}`);
+        const palavras = await resposta.json();
+
+        if (palavras.length > 0) {
+          resultadoDiv.innerHTML = `Existem palavras que começam com "${prefixo}"`;
+        } else {
+          resultadoDiv.innerHTML = `Nenhuma palavra começa com "${prefixo}".`;
+        }
+      } catch (erro) {
+        console.error(erro);
+        resultadoDiv.innerHTML = `Erro ao consultar o Dicionário Aberto: ${erro.message}`;
+      }
+    }
+  </script>
+</body>
+</html>
