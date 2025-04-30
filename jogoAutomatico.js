@@ -117,53 +117,52 @@ async function processarVariacoes(urlBase, variacoes) {
 }
 
 async function verificarPalavra() {
-    const variacoes = gerarVariacoes(palavra);
 
-    async function processarVariacoes(urlBase) {
-      for (let word of variacoes) {
+    async function corresponderExatamente() {
         try {
-            const resposta = await fetch(`${urlBase}/${word}`);
+            const resposta = await fetch(`https://api.dicionario-aberto.net/near/${palavra}`);
             const dados = await resposta.json();
-  
-            if (urlBase.includes("word")) {
-                const parser = new DOMParser();
-                const xmlDoc = parser.parseFromString(dados[0]?.xml || "", "application/xml");
-                const definicoes = xmlDoc.getElementsByTagName("def");
-
-                if (definicoes.length !==  0) {
+            const palavrasValidas = await dados
+                .filter(e => e.length === palavra.length)
+                .map(element => element.replace(/[áâéêíóôúç]/gi, match => caracteresUnicos[match.toLowerCase()] || match))
+                .filter(e => e === palavra);
+            console.log(palavrasValidas)
+            if (palavrasValidas.length > 0) {
                     return true;
-                }
-            } 
-            
-            else if (urlBase.includes("prefix")) {
-                if (dados.length > 0) {
-                    return false;
-                }
             }
+
+            else return false;
         } catch (error) {
           console.error(error);
         }
-      }
-
-      return urlBase.includes("prefix") ? true : false;
     }
-  
-    if (palavra.length > 2) {
-        const prefixoInvalido = await processarVariacoes("https://api.dicionario-aberto.net/prefix");
-        if (prefixoInvalido) {
-            await vitoriaRound(1 , jgdrAtual === "vermelho" ? "AZUL" : "VERMELHO");
+
+    async function corresponderPrefixo() {
+        const variacoes = await gerarVariacoes(palavra);
+        for (let word of variacoes) {
+            const resposta = await fetch(`https://api.dicionario-aberto.net/prefix/${word}`);
+            const dados = await resposta.json();
+            if (dados.length !== 0) {
+                return false
+            }
         }
+        return true
     }
-
+    
     if (palavra.length > 4) {
-        const palavraExiste = await processarVariacoes("https://api.dicionario-aberto.net/word");
+        const palavraExiste = await corresponderExatamente();
     
         if (palavraExiste) {
             await vitoriaRound(2, jgdrAtual === "vermelho" ? "AZUL" : "VERMELHO");
         }
+        else if (palavra.length > 2) {
+            const prefixoInvalido = await corresponderPrefixo();
+            if (prefixoInvalido) {
+                await vitoriaRound(1 , jgdrAtual === "vermelho" ? "AZUL" : "VERMELHO");
+            }
+            else if (caixaAtual == 8) vitoriaRound (0, jgdrAtual)
+        }
     }
-
-    if (caixaAtual == 8) vitoriaRound (0, jgdrAtual)
 }
 
 async function vitoriaRound(caso, vencedor) {
@@ -267,6 +266,18 @@ function updateCountdownDisplay() {
     }
 }
 
+const caracteresUnicos = {
+    "á" : "a",
+    "â" : "a",
+    "é" : "e",
+    "ê" : "e",
+    "í" : "i",
+    "ó" : "o",
+    "ô" : "o",
+    "ú" : "u",
+    "ç" : "c"
+}
+
 function gerarVariacoes(palavra) {
     const mapeamento = {
       a: ['a', 'á', 'â', 'ã'],
@@ -295,7 +306,7 @@ function gerarVariacoes(palavra) {
     }
   
     return combinar('', 0, false);
-  }
+}
 
 const iniciosInvalidos = [
     "aa", "ak", "aw", "ay",

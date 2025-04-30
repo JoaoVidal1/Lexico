@@ -4,14 +4,39 @@
   <meta charset="UTF-8">
   <title>Verificar Prefixo - Dicionário Aberto</title>
 </head>
-<body onload="searchPrefix()">
-  <script>
-    function searchPrefix() {
-      word = prompt()
-      fetch(`https://api.datamuse.com/words?sp=${word}*&max=1`)
-        .then(res => res.json())
-        .then(data => console.log(data));
+<body>
+  <style>
+    body {
+      background-color: black;
     }
+  </style>
+  <script>
+    const caracteresUnicos = {
+      "á" : "a",
+      "â" : "a",
+      "é" : "e",
+      "ê" : "e",
+      "í" : "i",
+      "ó" : "o",
+      "ô" : "o",
+      "ú" : "u",
+      "ç" : "c"
+    }
+    async function lev(urlBase) {
+      try {
+        const word = await prompt();
+        const resposta = await fetch(`https://api.dicionario-aberto.net/near/${word}`);
+        const dados = await resposta.json();
+        const palavrasValidas = dados
+        .filter(e => e.length === word.length)
+        .map(element => element.replace(/[áâéêíóôúç]/gi, match => caracteresUnicos[match.toLowerCase()] || match))
+        .filter(e => e === word);
+        return dadosFiltrados;
+        } catch (error) {
+          console.error(error);
+      }
+    }
+    console.log(lev())
   </script>
 </body>
 </html>
