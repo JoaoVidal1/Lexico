@@ -85,10 +85,7 @@ function novaLetra(box) {
                 if (seguir) startTurnTimer();
             }
         });
-    } else if (document.documentElement.lang === "en") {
-
     }
-    
 }
 
 async function processarVariacoes(urlBase, variacoes) {
