@@ -1,328 +1,271 @@
-const red = "#ff2b47";
-const blue = "#992bff";
-const redlight = "#ff8292";
-const bluelight = "#c587ff";
-const genDisable = "#333333";
-const caracteres = /^[a-zA-Z]$/
+/*
+ * Refatoração do jogo de palavras
+ * Código modular, organizado e eficiente
+ */
 
-let maxPoints = 15;
-
-let maxTime = 15;
-let turnTimer;
-let countdownInterval;
-let endTime;
-
-let jgdrAtual = "vermelho";
-let palavra = "";
-
-let pontosRed = 0.75;
-let pontosBlue = 0.75;
-
-let caixaAtual = 0;
-
-let seguir = true;
-let novoJogo = false;
-
-function novaPartida(event) {
-    maxTime = document.getElementById("input-tempo").value
+// ====== Configurações e Constantes ======
+const CONFIG = {
+    colors: {
+      red: "#ff2b47",
+      blue: "#992bff",
+      redLight: "#ff8292",
+      blueLight: "#c587ff",
+      disabled: "#333333",
+    },
+    maxPoints: 15,
+    defaultPoints: 0.75,
+    charPattern: /^[a-zA-Z]$/,
+    invalidPrefixes: [ /* array iniciosInvalidos */ ],
+    api: {
+      prefix: "https://api.dicionario-aberto.net/prefix",
+      word: "https://api.dicionario-aberto.net/word",
+    }
+  };
+  
+  // ====== Estado do Jogo ======
+  const gameState = {
+    maxTime: CONFIG.maxPoints,
+    currentPlayer: 'vermelho',
+    currentWord: '',
+    boxIndex: 1,
+    points: { vermelho: CONFIG.defaultPoints, azul: CONFIG.defaultPoints },
+    timer: null,
+    countdown: null,
+    endTime: null,
+    newGame: false,
+    continueTurn: true,
+  };
+  
+  // ====== Elementos do DOM ======
+  const DOM = {
+    startForm: document.getElementById('comecar-partida'),
+    inputTime: document.getElementById('input-tempo'),
+    startBtn: document.getElementById('comecar-partida').querySelector('button'),
+    countdown: document.getElementById('countdown'),
+    victoryModal: document.getElementById('vitoria-round'),
+    victoryDetails: document.getElementById('detalhes-vitoria'),
+    charBoxes: () => document.querySelectorAll('.input-char'),
+    validMsg: document.getElementById('char-valido'),
+    scoreBar: {
+      red: document.getElementById('pontos-red'),
+      blue: document.getElementById('pontos-blue'),
+    }
+  };
+  
+  // ====== Inicialização ======
+  function init() {
+    DOM.startForm.addEventListener('submit', startGame);
+    DOM.charBoxes().forEach(box => box.addEventListener('input', onBoxInput));
+  }
+  
+  // ====== Início de Partida ======
+  function startGame(event) {
     event.preventDefault();
-    document.getElementById("comecar-partida").style.display = 'none';
+    gameState.maxTime = Number(DOM.inputTime.value) || gameState.maxTime;
+    DOM.startForm.style.display = 'none';
     resetRound();
-}
-
-function resetRound() {
-    clearTimeout(turnTimer);
-    clearInterval(countdownInterval);
-    caixaAtual = 0;
-    palavra = "";
-    let initialBox = document.getElementById(`char1`);
-    let disabledBoxes = document.getElementsByClassName("start-disabled");
-    initialBox.value = "";
-    initialBox.disabled = false;
-    initialBox.style.borderColor = jgdrAtual === "vermelho" ? red : blue;
-    initialBox.style.boxShadow = `0px 0px 1.5dvw ${jgdrAtual === "vermelho" ? red : blue}`;
-
-    for (let box of disabledBoxes) {
-        box.disabled = true;
-        box.value = "";
-        box.style.borderColor = genDisable;
-        box.style.boxShadow = `none`;
-    }
-}
-
-function novaLetra(box) {
-    seguir = true;
-    travarInput();
-    caixaAtual = box;
-    let cBox = document.getElementById(`char${caixaAtual}`);
-
-    if (!caracteres.test(cBox.value) || (palavra.length < 2 && iniciosInvalidos.includes(palavra + cBox.value.toLowerCase()))) {
-        document.getElementById(`char-valido`).style.display = 'flex';
-        cBox.value = "";
-        cBox.disabled = false;
-        return;
-    }
-
-    document.getElementById("countdown").style.display = 'block';
-    seguir = true;
-
-    clearTimeout(turnTimer);
-    clearInterval(countdownInterval);
-
-    let nBox = document.getElementById(`char${caixaAtual+1}`);
-    cBox.disabled = true;
-    cBox.style.boxShadow = `none`
-    palavra += cBox.value.toLowerCase();
-
-    if (document.documentElement.lang === "pt") {
-        verificarPalavra().then(() => {
-            if (caixaAtual < 8) {
-                nBox.style.borderColor = jgdrAtual === "vermelho" ? blue : red;
-                nBox.style.boxShadow = `0px 0px 1.5dvw ${jgdrAtual === "vermelho" ? blue : red}`
-                nBox.disabled = false;
-                nBox.focus();
-                jgdrAtual = jgdrAtual === "vermelho" ? "azul" : "vermelho";
-                if (seguir) startTurnTimer();
-            }
-        });
-    }
-}
-
-async function processarVariacoes(urlBase, variacoes) {
-    try {
-        const promises = variacoes.map(async (word) => {
-        const resposta = await fetch(`${urlBase}/${word}`);
-        const dados = await resposta.json();
+  }
   
-        if (urlBase.includes("word")) {
-            const parser = new DOMParser();
-            const xmlDoc = parser.parseFromString(dados[0]?.xml || "", "application/xml");
-            const definicoes = xmlDoc.getElementsByTagName("def");
-            return definicoes.length !== 0;
-        } 
-        
-        if (urlBase.includes("prefix")) {
-            return dados.length === 0;
-        }
+  // ====== Reset Round ======
+  function resetRound() {
+    clearTimers();
+    Object.assign(gameState, { boxIndex: 1, currentWord: '', continueTurn: true });
   
-        return false;
-        });
+    DOM.charBoxes().forEach((box, i) => {
+      box.value = '';
+      box.disabled = i !== 0;
+      box.style.borderColor = i === 0 ? getPlayerColor() : CONFIG.colors.disabled;
+      box.style.boxShadow = i === 0 ? `0 0 1.5dvw ${getPlayerColor()}` : 'none';
+      if (i === 0) box.focus();
+    });
+  }
   
-        const resultados = await Promise.all(promises);
-        return urlBase.includes("prefix") ? !resultados.some(r => !r) : resultados.some(r => r);
-    } catch (error) {
-        console.error(error);
-        return urlBase.includes("prefix") ? true : false;
-    }
-}
-
-async function verificarPalavra() {
-    const variacoes = gerarVariacoes(palavra);
-
-    async function processarVariacoes(urlBase) {
-      for (let word of variacoes) {
-        try {
-            const resposta = await fetch(`${urlBase}/${word}`);
-            const dados = await resposta.json();
+  // ====== Input Handling ======
+  function onBoxInput(event) {
+    const box = event.target;
+    const char = box.value;
   
-            if (urlBase.includes("word")) {
-                const parser = new DOMParser();
-                const xmlDoc = parser.parseFromString(dados[0]?.xml || "", "application/xml");
-                const definicoes = xmlDoc.getElementsByTagName("def");
-
-                if (definicoes.length !==  0) {
-                    return true;
-                }
-            } 
-            
-            else if (urlBase.includes("prefix")) {
-                if (dados.length > 0) {
-                    return false;
-                }
-            }
-        } catch (error) {
-          console.error(error);
-        }
-      }
-
-      return urlBase.includes("prefix") ? true : false;
+    if (!validateChar(char)) {
+      showInvalid();
+      box.value = '';
+      return;
     }
   
-    if (palavra.length > 2) {
-        const prefixoInvalido = await processarVariacoes("https://api.dicionario-aberto.net/prefix");
-        if (prefixoInvalido) {
-            await vitoriaRound(1 , jgdrAtual === "vermelho" ? "AZUL" : "VERMELHO");
-        }
-    }
-
-    if (palavra.length > 4) {
-        const palavraExiste = await processarVariacoes("https://api.dicionario-aberto.net/word");
-    
-        if (palavraExiste) {
-            await vitoriaRound(2, jgdrAtual === "vermelho" ? "AZUL" : "VERMELHO");
-        }
-    }
-
-    if (caixaAtual == 8) vitoriaRound (0, jgdrAtual)
-}
-
-async function vitoriaRound(caso, vencedor) {
-    seguir = false;
-    document.getElementById("countdown").style.display = 'none';
-    travarInput();
-    let pontosRodada = 9 - caixaAtual;
-    let detalhes = document.getElementById("detalhes-vitoria");
-    detalhes.innerHTML = `<span id="cor-vitoria">${pontosRodada} PONTOS PARA O ${vencedor}</span><br>`;
-
-    if (caso == 3) pontosRodada--;
-    if (caso != 0) vencedor == "AZUL" ? pontosBlue +=  pontosRodada: pontosRed += pontosRodada;
-    if (pontosBlue > maxPoints || pontosRed > maxPoints) vitoriaJogo();
-
-    else {
-        switch (caso) {
-            case 0:
-                detalhes.innerHTML = `Houve um empate<br><span style="color:${jgdrAtual == "vermelho" ? red : blue}">'${palavra}'</span> não é uma palavra, mas é possivei prosseguir a partir dela<br><a id="link-sentido" href="https://www.dicio.com.br/pesquisa.php?q=${palavra}">Palavras possiveis</a>`;
-                document.getElementById("link-sentido").style.color = "#00ffbf";
-                break
-            case 1:   
-                detalhes.innerHTML += `Não é permitido começar com "${palavra}"`;
-                break
-            case 2:
-                detalhes.innerHTML += `O jogador ${jgdrAtual} escreveu <br><a id="link-sentido" href="https://www.dicio.com.br/pesquisa.php?q=${palavra}/">${palavra}</a>`;
-                document.getElementById("link-sentido").style.color = vencedor === "AZUL" ? red : blue;
-                break
-            case 3:
-                detalhes.innerHTML += `O jogador ${jgdrAtual} demorou demais<br>Palavras que começam com <a id="link-sentido" href="https://dicionario-aberto.net/ss_search/prefix/${palavra}">'${palavra}'</a>`;
-                document.getElementById("link-sentido").style.color = vencedor === "AZUL" ? red : blue;
-                break
-            default:
-                break;
-        }
-    }
-
-    if (caso != 0) document.getElementById("cor-vitoria").style.color = vencedor === "VERMELHO" ? red : blue;
-    document.getElementById("vitoria-round").style.display = "flex";
-}
-
-function travarInput() {
-    let disabledBoxes = document.getElementsByClassName("input-char");
-    
-    for (let box of disabledBoxes) {
-        box.disabled = true;
-        box.style.boxShadow = 'none';
-    }
-}
-
-function proximoRound() {
-    if (novoJogo) {
-        novoJogo = false;
-        document.getElementById("comecar-partida").style.display = 'flex';
+    hideInvalid();
+    clearTimers();
+    const idx = gameState.boxIndex;
+    gameState.currentWord += char.toLowerCase();
+    box.disabled = true;
+    box.style.boxShadow = 'none';
+  
+    if (idx < 8) {
+      switchPlayer();
+      updateNextBox(idx + 1);
+      if (gameState.continueTurn) startTurnTimer();
+      checkWordProgress();
     } else {
-    document.getElementById(`vitoria-round`).style.display = 'none';
-    document.getElementById(`pontos-red`).style.height = `${pontosRed*100/maxPoints}dvh`;
-    document.getElementById(`pontos-blue`).style.height = `${pontosBlue*100/maxPoints}dvh`;
-    resetRound();
+      endRound('draw');
     }
-}
-
-function vitoriaJogo() {
-    document.getElementById("detalhes-vitoria").innerHTML = `PARABÉNS JOGADOR <span style="color:${pontosRed > pontosBlue ? red : blue}">${pontosRed > pontosBlue ? "VERMELHO" : "AZUL"}</span>, VOCÊ VENCEU!<br><span style="color:${red}">${pontosRed-0.75}</span> : <span style="color:${blue}">${pontosBlue-0.75}</span>`;
-    document.getElementById("vitoria-round").style.display = "flex";
-    jgdrAtual = "vermelho";
-    palavra = "";
-    pontosBlue = 0.75;
-    pontosRed = 0.75;
-    novoJogo = true;
-}
-
-function startTurnTimer() {
-    clearTimeout(turnTimer);
-    clearInterval(countdownInterval);
-
-    endTime = new Date().getTime() + maxTime * 1000;
-
-    updateCountdownDisplay();
-
-    countdownInterval = setInterval(updateCountdownDisplay, 1000);
-    turnTimer = setTimeout(timeOutAction, maxTime * 1000);
-    document.getElementById("countdown").style.color = jgdrAtual == "vermelho" ? red : blue;
-    document.getElementById("countdown").style.borderColor = jgdrAtual == "vermelho" ? red : blue;
-}
-
-function timeOutAction() {
-    vitoriaRound(3, jgdrAtual === "vermelho" ? "AZUL" : "VERMELHO", palavra);
-}
-
-function updateCountdownDisplay() {
-    const now = new Date().getTime();
-    let timeLeft = Math.ceil((endTime - now) / 1000);
-
-    if (timeLeft < 0) {
-        timeLeft = 0;
+  }
+  
+  // ====== Validações ======
+  function validateChar(c) {
+    return CONFIG.charPattern.test(c) && 
+      !(gameState.currentWord.length < 2 && CONFIG.invalidPrefixes.includes((gameState.currentWord + c).toLowerCase()));
+  }
+  function showInvalid() { DOM.validMsg.style.display = 'flex'; }
+  function hideInvalid() { DOM.validMsg.style.display = 'none'; }
+  
+  // ====== Atualiza Caixa ======
+  function updateNextBox(i) {
+    gameState.boxIndex = i;
+    const next = document.getElementById(`char${i}`);
+    next.disabled = false;
+    next.style.borderColor = getPlayerColor();
+    next.style.boxShadow = `0 0 1.5dvw ${getPlayerColor()}`;
+    next.focus();
+  }
+  
+  // ====== Jogador Ativo ======
+  function getPlayerColor() {
+    return gameState.currentPlayer === 'vermelho'
+      ? CONFIG.colors.blue
+      : CONFIG.colors.red;
+  }
+  function switchPlayer() {
+    gameState.currentPlayer = gameState.currentPlayer === 'vermelho' ? 'azul' : 'vermelho';
+  }
+  
+  // ====== Timer ======
+  function startTurnTimer() {
+    const now = Date.now();
+    gameState.endTime = now + gameState.maxTime * 1000;
+    updateCountdown();
+    gameState.countdown = setInterval(updateCountdown, 1000);
+    gameState.timer = setTimeout(() => endRound('timeout'), gameState.maxTime * 1000);
+    DOM.countdown.style.color = getBaseColor();
+    DOM.countdown.style.borderColor = getBaseColor();
+    DOM.countdown.style.display = 'block';
+  }
+  function updateCountdown() {
+    const remaining = Math.max(0, Math.ceil((gameState.endTime - Date.now()) / 1000));
+    DOM.countdown.textContent = `00:${remaining.toString().padStart(2, '0')}`;
+  }
+  function clearTimers() {
+    clearTimeout(gameState.timer);
+    clearInterval(gameState.countdown);
+    DOM.countdown.style.display = 'none';
+  }
+  function getBaseColor() {
+    return gameState.currentPlayer === 'vermelho'
+      ? CONFIG.colors.red
+      : CONFIG.colors.blue;
+  }
+  
+  // ====== Verificação de Palavra ======
+  async function checkWordProgress() {
+    const word = gameState.currentWord;
+    if (word.length > 2 && await checkPrefix(word)) {
+      endRound('invalidPrefix');
+      return;
     }
-    
-    const countdownElement = document.getElementById("countdown");
-    if (countdownElement) {
-        countdownElement.innerText = timeLeft > 9 ? `00:${timeLeft}` : `00:0${timeLeft}`;
+    if (word.length > 4 && await checkExists(word)) {
+      endRound('validWord');
     }
-}
-
-function gerarVariacoes(palavra) {
-    const mapeamento = {
-      a: ['a', 'á', 'â', 'ã'],
-      e: ['e', 'é', 'ê'],
-      i: ['i', 'í'],
-      o: ['o', 'ó', 'ô', 'õ'],
-      u: ['u', 'ú', 'ü'],
-      c: ['c', 'ç']
-    };
+  }
+  async function checkPrefix(prefix) {
+    try {
+      const res = await fetch(`${CONFIG.api.prefix}/${prefix}`);
+      const data = await res.json();
+      return data.length > 0;
+    } catch { return true; }
+  }
+  async function checkExists(word) {
+    try {
+      const res = await fetch(`${CONFIG.api.word}/${word}`);
+      const [entry] = await res.json();
+      const parser = new DOMParser();
+      const xml = parser.parseFromString(entry?.xml || '', 'application/xml');
+      return xml.getElementsByTagName('def').length > 0;
+    } catch { return false; }
+  }
   
-    function combinar(subPalavra, indice, acentoUsado) {
-      if (indice === palavra.length) {
-        return [subPalavra];
-      }
+  // ====== Fim de Round ======
+  function endRound(reason) {
+    gameState.continueTurn = false;
+    clearTimers();
+    const winner = determineWinner(reason);
+    updateScore(winner, reason);
+    showVictory(winner, reason);
+  }
+  function determineWinner(reason) {
+    switch (reason) {
+      case 'invalidPrefix': return gameState.currentPlayer === 'vermelho' ? 'azul' : 'vermelho';
+      case 'timeout': return gameState.currentPlayer === 'vermelho' ? 'azul' : 'vermelho';
+      case 'validWord': return gameState.currentPlayer === 'vermelho' ? 'azul' : 'vermelho';
+      default: return null; // draw
+    }
+  }
+  function updateScore(winner, reason) {
+    const points = 9 - gameState.boxIndex + (reason === 'draw' ? 0 : 0);
+    if (winner) gameState.points[winner] += points;
+  }
+  function showVictory(winner, reason) {
+    const det = DOM.victoryDetails;
+    det.innerHTML = buildVictoryHTML(winner, reason);
+    DOM.victoryModal.style.display = 'flex';
+  }
+  function buildVictoryHTML(winner, reason) {
+    const word = gameState.currentWord;
+    const pt = 9 - gameState.boxIndex;
+    let html = `<span id="cor-vitoria">${pt} pontos para ${winner.toUpperCase()}</span><br>`;
+    switch (reason) {
+      case 'invalidPrefix': html += `Prefixo inválido: "${word}" não pode iniciar.`; break;
+      case 'timeout': html += `Tempo esgotado!`; break;
+      case 'validWord': html += `Palavra encontrada: <a href="https://dicio.com.br/pesquisa?q=${word}">${word}</a>`; break;
+      default: html += `Empate!`; break;
+    }
+    return html;
+  }
   
-      const char = palavra[indice];
-      const alternativas = mapeamento[char] || [char];
+  // ====== Próximo Round e Vitória de Jogo ======
+  function nextRound() {
+    if (gameState.newGame) resetGame();
+    else {
+      DOM.victoryModal.style.display = 'none';
+      updateScoreBars();
+      resetRound();
+    }
+  }
+  function updateScoreBars() {
+    DOM.scoreBar.red.style.height = `${(gameState.points.vermelho*100)/CONFIG.maxPoints}dvh`;
+    DOM.scoreBar.blue.style.height = `${(gameState.points.azul*100)/CONFIG.maxPoints}dvh`;
+  }
+  function resetGame() {
+    gameState.newGame = false;
+    DOM.startForm.style.display = 'flex';
+    gameState.currentPlayer = 'vermelho';
+    gameState.points = { vermelho: CONFIG.defaultPoints, azul: CONFIG.defaultPoints };
+  }
   
-      return alternativas.flatMap(letra => {
-        const isAcentuada = mapeamento[char]?.includes(letra) && letra !== char;
-        if (acentoUsado && isAcentuada) {
-          return [];
-        }
-        return combinar(subPalavra + letra, indice + 1, acentoUsado || isAcentuada);
+  // ====== Geração de Variações de Acentos ======
+  function generateVariations(word) {
+    const map = { a:['a','á','â','ã'], e:['e','é','ê'], i:['i','í'], o:['o','ó','ô','õ'], u:['u','ú','ü'], c:['c','ç'] };
+    const results = [];
+  
+    function combine(prefix, i, accentUsed) {
+      if (i === word.length) return results.push(prefix);
+      const ch = word[i];
+      const alts = map[ch] || [ch];
+      alts.forEach(letter => {
+        const used = accentUsed || (map[ch]?.includes(letter) && letter !== ch);
+        if (!used || !map[ch]?.includes(letter)) combine(prefix + letter, i + 1, used);
       });
     }
-  
-    return combinar('', 0, false);
+    combine('', 0, false);
+    return results;
   }
-
-const iniciosInvalidos = [
-    "aa", "ak", "aw", "ay",
-    "bb", "bc", "bd", "bf", "bg", "bh", "bj", "bk", "bm", "bn", "bp", "bq", "bs", "bt", "bv", "bw", "bx", "by", "bz",
-    "cb", "cc", "cd", "cf", "cg", "cj", "ck", "cm", "cn", "cp", "cq", "cs", "cv", "cw", "cx", "cy", "cz",
-    "db", "dc", "dd", "df", "dg", "dh", "dj", "dk", "dl", "dm", "dn", "dp", "dq", "ds", "dt", "dv", "dw", "dx", "dy", "dz",
-    "ee", "ej", "ek", "eh", "eo", "ew", "ey",
-    "fb", "fc", "fd", "ff", "fg", "fh", "fj", "fk", "fm", "fn", "fp", "fq", "fs", "ft", "fv", "fw", "fx", "fy", "fz",
-    "gb", "gc", "gd", "gf", "gg", "gh", "gj", "gk", "gm", "gp", "gq", "gs", "gt", "gv", "gw", "gx", "gy", "gz",
-    "hb", "hc", "hd", "hf", "hg", "hh", "hj", "hk", "hl", "hm", "hn", "hp", "hq", "hr", "hs", "ht", "hv", "hw", "hx", "hy", "hz",
-    "ih", "ii", "ij", "ik", "iq", "iw", "iy",
-    "jb", "jc", "jd", "jf", "jg", "jh", "jj", "jk", "jl", "jm", "jn", "jp", "jq", "jr", "js", "jt", "jv", "jw", "jx", "jy", "jz",
-    "kb", "kc", "kd", "kf", "kg", "kj", "kk", "kp", "kq", "kt", "kv", "kx", "kz",
-    "lb", "lc", "ld", "lf", "lg", "lj", "lk", "ll", "lm", "ln", "lp", "lq", "lr", "ls", "lt", "lv", "lw", "lx", "ly", "lz",
-    "mb", "mc", "md", "mf", "mg", "mh", "mj", "mk", "ml", "mm", "mn", "mp", "mq", "mr", "ms", "mt", "mv", "mw", "mx", "my", "mz",
-    "nb", "nc", "nd", "nf", "ng", "nj", "nk", "nl", "nm", "nn", "np", "nq", "nr", "ns", "nt", "nv", "nw", "nx", "ny", "nz",
-    "oa", "oe", "oj", "ok", "oo", "oq", "ow", "oy",
-    "pb", "pc", "pd", "pf", "pg", "pj", "pk", "pm", "pn", "pp", "pq", "pt", "pv", "pw", "px", "py", "pz",
-    "qa", "qb", "qc", "qd", "qe", "qf", "qg", "qh", "qi", "qj", "qk", "ql", "qm", "qn", "qo", "qq", "qr", "qs", "qt", "qv", "qw", "qx", "qy", "qz",
-    "rb", "rc", "rd", "rf", "rg", "rh", "rj", "rk", "rl", "rm", "rn", "rp", "rq", "rr", "rs", "rt", "rv", "rw", "rx", "ry", "rz",
-    "sb", "sd", "sf", "sg", "sh", "sj", "sq", "sr", "ss", "sv", "sw", "sx", "sy", "sz",
-    "tb", "tc", "td", "tf", "tg", "th", "tj", "tk", "tl", "tm", "tn", "tp", "tq", "tt", "tv", "tw", "ty", "tz",
-    "uh", "uj", "uk", "uo", "up", "uq", "uu", "uv", "uw", "ux", "uy",
-    "vb", "vc", "vd", "vf", "vg", "vh", "vj", "vk", "vl", "vm", "vn", "vp", "vq", "vr", "vs", "vt", "vv", "vw", "vx", "vy", "vz",
-    "w",
-    "xb", "xc", "xd", "xf", "xg", "xh", "xj", "xk", "xl", "xm", "xn", "xp", "xq", "xr", "xs", "xt", "xv", "xw", "xx", "xy", "xz",
-    "y",
-    "zb", "zc", "zd", "zf", "zg", "zh", "zj", "zk", "zl", "zm", "zn", "zp", "zq", "zr", "zs", "zt", "zv", "zw", "zx", "zy", "zz"
-];
+  
+  // ====== Inicia ======
+  document.addEventListener('DOMContentLoaded', init);
   
