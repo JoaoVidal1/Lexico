@@ -33,6 +33,7 @@ body {
 
 header {
     margin-top: 10dvh;
+    z-index: 10;
 }
 
 h1 {
@@ -114,4 +115,40 @@ main {
 #pontos-blue {
     background-color: var(--blue);
     right: 0px;
+}
+
+#countdown {
+    font-size: xx-large;
+    position: fixed;
+    bottom: 15dvh;
+    border: 2px solid transparent;
+    border-radius: 20px;
+    padding: 30px;
+}
+
+#comecar-partida {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: black;
+}
+
+.label-home {
+    margin-bottom: 5dvh;
+}
+
+#input-tempo {
+    font-size: large;
+}
+
+:is(select, input):open {
+    background-color: black;
+}
+
+#jogar {
+    margin-top: 5dvh;
+    background-color: black;
+    border: 2px solid var(--red);
+    padding: 20px;
+    border-radius: 20px;
 }

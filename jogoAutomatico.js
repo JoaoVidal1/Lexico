@@ -6,8 +6,11 @@ const genDisable = "#333333";
 const caracteres = /^[a-zA-Z]$/
 
 let maxPoints = 15;
-let maxTime = 5;
+
+let maxTime = 15;
 let turnTimer;
+let countdownInterval;
+let endTime;
 
 let jgdrAtual = "vermelho";
 let palavra = "";
@@ -17,9 +20,19 @@ let pontosBlue = 0.75;
 
 let caixaAtual = 0;
 
+let seguir = true;
+let novoJogo = false;
+
+function novaPartida(event) {
+    maxTime = document.getElementById("input-tempo").value
+    event.preventDefault();
+    document.getElementById("comecar-partida").style.display = 'none';
+    resetRound();
+}
+
 function resetRound() {
     clearTimeout(turnTimer);
-    clearTimeout(turnTimer);
+    clearInterval(countdownInterval);
     caixaAtual = 0;
     palavra = "";
     let initialBox = document.getElementById(`char1`);
@@ -38,32 +51,72 @@ function resetRound() {
 }
 
 function novaLetra(box) {
+    seguir = true;
     travarInput();
     caixaAtual = box;
     let cBox = document.getElementById(`char${caixaAtual}`);
 
-    if (!caracteres.test(cBox.value) || iniciosInvalidos.includes(palavra + cBox.value.toLowerCase())) {
+    if (!caracteres.test(cBox.value) || (palavra.length < 2 && iniciosInvalidos.includes(palavra + cBox.value.toLowerCase()))) {
         document.getElementById(`char-valido`).style.display = 'flex';
         cBox.value = "";
         cBox.disabled = false;
         return;
     }
+
+    document.getElementById("countdown").style.display = 'block';
+    seguir = true;
+
     clearTimeout(turnTimer);
+    clearInterval(countdownInterval);
+
     let nBox = document.getElementById(`char${caixaAtual+1}`);
     cBox.disabled = true;
     cBox.style.boxShadow = `none`
     palavra += cBox.value.toLowerCase();
 
-    verificarPalavra().then(() => {
-        if (caixaAtual < 8) {
-            nBox.style.borderColor = jgdrAtual === "vermelho" ? blue : red;
-            nBox.style.boxShadow = `0px 0px 1.5dvw ${jgdrAtual === "vermelho" ? blue : red}`
-            nBox.disabled = false;
-            nBox.focus();
-            jgdrAtual = jgdrAtual === "vermelho" ? "azul" : "vermelho";
-            startTurnTimer()
+    if (document.documentElement.lang === "pt") {
+        verificarPalavra().then(() => {
+            if (caixaAtual < 8) {
+                nBox.style.borderColor = jgdrAtual === "vermelho" ? blue : red;
+                nBox.style.boxShadow = `0px 0px 1.5dvw ${jgdrAtual === "vermelho" ? blue : red}`
+                nBox.disabled = false;
+                nBox.focus();
+                jgdrAtual = jgdrAtual === "vermelho" ? "azul" : "vermelho";
+                if (seguir) startTurnTimer();
+            }
+        });
+    } else if (document.documentElement.lang === "en") {
+
+    }
+    
+}
+
+async function processarVariacoes(urlBase, variacoes) {
+    try {
+        const promises = variacoes.map(async (word) => {
+        const resposta = await fetch(`${urlBase}/${word}`);
+        const dados = await resposta.json();
+  
+        if (urlBase.includes("word")) {
+            const parser = new DOMParser();
+            const xmlDoc = parser.parseFromString(dados[0]?.xml || "", "application/xml");
+            const definicoes = xmlDoc.getElementsByTagName("def");
+            return definicoes.length !== 0;
+        } 
+        
+        if (urlBase.includes("prefix")) {
+            return dados.length === 0;
         }
-    });
+  
+        return false;
+        });
+  
+        const resultados = await Promise.all(promises);
+        return urlBase.includes("prefix") ? !resultados.some(r => !r) : resultados.some(r => r);
+    } catch (error) {
+        console.error(error);
+        return urlBase.includes("prefix") ? true : false;
+    }
 }
 
 async function verificarPalavra() {
@@ -98,6 +151,12 @@ async function verificarPalavra() {
       return urlBase.includes("prefix") ? true : false;
     }
   
+    if (palavra.length > 2) {
+        const prefixoInvalido = await processarVariacoes("https://api.dicionario-aberto.net/prefix");
+        if (prefixoInvalido) {
+            await vitoriaRound(1 , jgdrAtual === "vermelho" ? "AZUL" : "VERMELHO");
+        }
+    }
 
     if (palavra.length > 4) {
         const palavraExiste = await processarVariacoes("https://api.dicionario-aberto.net/word");
@@ -105,22 +164,14 @@ async function verificarPalavra() {
         if (palavraExiste) {
             await vitoriaRound(2, jgdrAtual === "vermelho" ? "AZUL" : "VERMELHO");
         }
-    } 
-    
-    else if (palavra.length > 2) {
-      const prefixoInvalido = await processarVariacoes("https://api.dicionario-aberto.net/prefix");
-      if (prefixoInvalido) {
-        await vitoriaRound(1 , jgdrAtual === "vermelho" ? "AZUL" : "VERMELHO");
-      }
-
-      else if (caixaAtual == 8) vitoriaRound (0, jgdrAtual)
     }
 
+    if (caixaAtual == 8) vitoriaRound (0, jgdrAtual)
 }
 
-
 async function vitoriaRound(caso, vencedor) {
-    clearTimeout(turnTimer);
+    seguir = false;
+    document.getElementById("countdown").style.display = 'none';
     travarInput();
     let pontosRodada = 9 - caixaAtual;
     let detalhes = document.getElementById("detalhes-vitoria");
@@ -133,18 +184,18 @@ async function vitoriaRound(caso, vencedor) {
     else {
         switch (caso) {
             case 0:
-                detalhes.innerHTML = `Houve um empate<br>${palavra} não é uma palavra, mas é possivei prosseguir a partir dela<br><a id="link-sentido" href="https://www.dicio.com.br/pesquisa.php?q=${palavra}">Palavras possiveis</a>`;
+                detalhes.innerHTML = `Houve um empate<br><span style="color:${jgdrAtual == "vermelho" ? red : blue}">'${palavra}'</span> não é uma palavra, mas é possivei prosseguir a partir dela<br><a id="link-sentido" href="https://www.dicio.com.br/pesquisa.php?q=${palavra}">Palavras possiveis</a>`;
                 document.getElementById("link-sentido").style.color = "#00ffbf";
                 break
             case 1:   
                 detalhes.innerHTML += `Não é permitido começar com "${palavra}"`;
                 break
             case 2:
-                detalhes.innerHTML += `O jogador ${jgdrAtual} escreveu <br><a id="link-sentido" href="https://www.dicio.com.br/${palavra}/">${palavra}</a>`;
+                detalhes.innerHTML += `O jogador ${jgdrAtual} escreveu <br><a id="link-sentido" href="https://www.dicio.com.br/pesquisa.php?q=${palavra}/">${palavra}</a>`;
                 document.getElementById("link-sentido").style.color = vencedor === "AZUL" ? red : blue;
                 break
             case 3:
-                detalhes.innerHTML += `O jogador ${jgdrAtual} demorou demais<br>Palavras que começam com <a id="link-sentido" href="https://www.dicio.com.br/pesquisa.php?q=${palavra}">'${palavra}'</a>`;
+                detalhes.innerHTML += `O jogador ${jgdrAtual} demorou demais<br>Palavras que começam com <a id="link-sentido" href="https://dicionario-aberto.net/ss_search/prefix/${palavra}">'${palavra}'</a>`;
                 document.getElementById("link-sentido").style.color = vencedor === "AZUL" ? red : blue;
                 break
             default:
@@ -154,8 +205,6 @@ async function vitoriaRound(caso, vencedor) {
 
     if (caso != 0) document.getElementById("cor-vitoria").style.color = vencedor === "VERMELHO" ? red : blue;
     document.getElementById("vitoria-round").style.display = "flex";
-
-    clearTimeout(turnTimer);
 }
 
 function travarInput() {
@@ -168,28 +217,57 @@ function travarInput() {
 }
 
 function proximoRound() {
+    if (novoJogo) {
+        novoJogo = false;
+        document.getElementById("comecar-partida").style.display = 'flex';
+    } else {
     document.getElementById(`vitoria-round`).style.display = 'none';
     document.getElementById(`pontos-red`).style.height = `${pontosRed*100/maxPoints}dvh`;
     document.getElementById(`pontos-blue`).style.height = `${pontosBlue*100/maxPoints}dvh`;
     resetRound();
+    }
 }
 
 function vitoriaJogo() {
-    document.getElementById("detalhes-vitoria").innerHTML = `<span style="color:${pontosRed > pontosBlue ? red : blue}">PARABÉNS JOGADOR ${pontosRed > pontosBlue ? "VERMELHO" : "AZUL"}, VOCÊ VENCEU!</span><br><span style="color:${red}">${pontosRed-0.75}</span> : <span style="color:${blue}">${pontosBlue-0.75}</span>`;
+    document.getElementById("detalhes-vitoria").innerHTML = `PARABÉNS JOGADOR <span style="color:${pontosRed > pontosBlue ? red : blue}">${pontosRed > pontosBlue ? "VERMELHO" : "AZUL"}</span>, VOCÊ VENCEU!<br><span style="color:${red}">${pontosRed-0.75}</span> : <span style="color:${blue}">${pontosBlue-0.75}</span>`;
     document.getElementById("vitoria-round").style.display = "flex";
     jgdrAtual = "vermelho";
     palavra = "";
     pontosBlue = 0.75;
     pontosRed = 0.75;
+    novoJogo = true;
 }
 
 function startTurnTimer() {
     clearTimeout(turnTimer);
+    clearInterval(countdownInterval);
+
+    endTime = new Date().getTime() + maxTime * 1000;
+
+    updateCountdownDisplay();
+
+    countdownInterval = setInterval(updateCountdownDisplay, 1000);
     turnTimer = setTimeout(timeOutAction, maxTime * 1000);
+    document.getElementById("countdown").style.color = jgdrAtual == "vermelho" ? red : blue;
+    document.getElementById("countdown").style.borderColor = jgdrAtual == "vermelho" ? red : blue;
 }
 
 function timeOutAction() {
     vitoriaRound(3, jgdrAtual === "vermelho" ? "AZUL" : "VERMELHO", palavra);
+}
+
+function updateCountdownDisplay() {
+    const now = new Date().getTime();
+    let timeLeft = Math.ceil((endTime - now) / 1000);
+
+    if (timeLeft < 0) {
+        timeLeft = 0;
+    }
+    
+    const countdownElement = document.getElementById("countdown");
+    if (countdownElement) {
+        countdownElement.innerText = timeLeft > 9 ? `00:${timeLeft}` : `00:0${timeLeft}`;
+    }
 }
 
 function gerarVariacoes(palavra) {
