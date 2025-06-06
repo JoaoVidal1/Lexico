@@ -3,6 +3,10 @@ const CONFIG = {
         pt: {
             prefix: "https://api.dicionario-aberto.net/prefix/",
             word: "https://api.dicionario-aberto.net/near/"
+        },
+        en: {
+            prefix: "",
+            word: ""
         }
     },
     colors: {
@@ -13,8 +17,9 @@ const CONFIG = {
     charPattern: /^[a-zA-Z]$/,
     charNotAllowed: /[áâéêíóôúç]/gi,
     maxPoints: 15,
-    maxTime: 15
-}
+    maxTime: 15,
+    lang: document.documentElement.lang
+};
 
 const GAMESTATE = {
     currentPlayer: 'red',
@@ -25,7 +30,7 @@ const GAMESTATE = {
     countdown: null,
     endTime: null,
     newGame: false,
-    continueTurn: true,
+    continueTurn: true
 };
 
 const DOM = {
@@ -143,42 +148,85 @@ function novaLetra(box) {
 }
 
 async function verificarPalavra() {
-    async function corresponderExatamente() {
-        try {
-            const resposta = await fetch(`https://api.dicionario-aberto.net/near/${GAMESTATE.currentWord}`);
-            const dados = await resposta.json();
-            const palavrasValidas = dados
-                .filter(e => e.length === GAMESTATE.currentWord.length)
-                .map(element => element.replace(CONFIG.charNotAllowed, match => caracteresUnicos[match.toLowerCase()] || match))
-                .filter(e => e === GAMESTATE.currentWord);
-            console.log(palavrasValidas);
-            return palavrasValidas.length > 0;
-        } catch (error) {
-            console.error(error);
-            return false;
+    async function matchWord() {
+        switch (CONFIG.lang) {
+            case "pt":
+                try {
+                    const resposta = await fetch(`https://api.dicionario-aberto.net/near/${GAMESTATE.currentWord}`);
+                    const dados = await resposta.json();
+                    const palavrasValidas = dados
+                        .filter(e => e.length === GAMESTATE.currentWord.length)
+                        .map(element => element.replace(CONFIG.charNotAllowed, match => caracteresUnicos[match.toLowerCase()] || match))
+                        .filter(e => e === GAMESTATE.currentWord);
+                    console.log(palavrasValidas);
+                    return palavrasValidas.length > 0;
+                } catch (error) {
+                    console.error(error);
+                    return false;
+                }
+            case "en":
+                try {
+                    const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${GAMESTATE.currentWord}`);
+                    if (res.ok) {
+                      const data = await res.json();
+                      return true; // Palavra existe
+                    } else if (res.status === 404) {
+                      return false; // Palavra não existe
+                    } else {
+                      throw new Error('Erro inesperado');
+                    }
+                  } catch (err) {
+                    console.error(err);
+                    return false;
+                  }
+            default:
+                break;
         }
     }
 
-    async function corresponderPrefixo() {
-        try {
-            const variacoes = await gerarVariacoes(GAMESTATE.currentWord);
-            for (let word of variacoes) {
-                const resposta = await fetch(`https://api.dicionario-aberto.net/prefix/${word}`);
-                const dados = await resposta.json();
-                if (dados.length > 0) {
-                    return true; // É um prefixo válido
+    async function matchPrefix() {
+        switch (CONFIG.lang) {
+            case "pt":
+                try {
+                    const variacoes = await gerarVariacoes(GAMESTATE.currentWord);
+                    for (let word of variacoes) {
+                        const resposta = await fetch(`https://api.dicionario-aberto.net/prefix/${word}`);
+                        const dados = await resposta.json();
+                        if (dados.length > 0) {
+                            return true; // É um prefixo válido
+                        }
+                    }
+                    return false; // Não é um prefixo válido
+                } catch (error) {
+                    console.error(error);
+                    return false;
                 }
-            }
-            return false; // Não é um prefixo válido
-        } catch (error) {
-            console.error(error);
-            return false;
+            case "en":
+                const url = `https://api.datamuse.com/words?sp=${encodeURIComponent(GAMESTATE.currentWord)}*&max=1`;
+
+                try {
+                    const res = await fetch(url);
+                    if (!res.ok) {
+                    throw new Error('Erro ao consultar Datamuse API');
+                    }
+
+                    const data = await res.json();
+                    
+                    // Se a resposta contém ao menos 1 palavra, o prefixo é válido
+                    return data.length > 0;
+                } catch (err) {
+                    console.error('Erro:', err);
+                    return false; // Em caso de erro, consideramos não válido
+                }
+            default:
+                return true
+                break;
         }
     }
     
     // Verificar se a palavra atual é uma palavra completa (jogador perde)
     if (GAMESTATE.currentWord.length >= 5) {
-        const palavraExiste = await corresponderExatamente();
+        const palavraExiste = await matchWord();
         
         if (palavraExiste) {
             // Jogador ANTERIOR perde (digitou uma palavra completa)
@@ -190,7 +238,7 @@ async function verificarPalavra() {
     }
     
     // Verificar se é um prefixo válido (pode continuar)
-    const ehPrefixoValido = await corresponderPrefixo();
+    const ehPrefixoValido = await matchPrefix();
     
     if (GAMESTATE.currentWord.length > 2 && !ehPrefixoValido) {
         // Não é nem palavra nem prefixo válido - jogador ANTERIOR perde
@@ -358,12 +406,21 @@ function gerarVariacoes(palavra) {
     return combinar('', 0, false);
 }
 
-function mostrarAjuda() {
-    document.getElementById('ajuda').style.display = 'flex';
+// Função que atualiza o atributo lang da página
+function atualizarLangPagina() {
+    const select = document.getElementById('select-lang');
+    const langSelecionado = select.value;
+    
+    document.documentElement.setAttribute('lang', langSelecionado);
+    DOM.victoryDetails.innerHTML = `O idioma do jogo foi alterado, portanto a partida será reiniciada`;
+    DOM.victoryModal.style.display = "flex";
+    GAMESTATE.currentPlayer = "red";
+    GAMESTATE.currentWord = "";
+    GAMESTATE.points.red = 0;
+    GAMESTATE.points.blue = 0;
+    GAMESTATE.newGame = true;
+    novaPartida();
 }
 
-document.getElementById('ajuda').addEventListener('click', function(e) {
-    if (e.target === this) {
-        this.style.display = 'none';
-    }
-});
+// Adiciona o event listener para mudança no select
+document.getElementById('select-lang').addEventListener('change', atualizarLangPagina);

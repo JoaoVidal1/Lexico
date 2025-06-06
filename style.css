@@ -456,3 +456,9 @@ main {
         max-height: 85vh;
     }
 }
+
+#select-lang {
+    position: fixed;
+    right: 15px;
+    top: 15px;
+}
