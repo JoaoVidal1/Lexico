@@ -4,7 +4,7 @@ Este projeto foi desenvolvido como um jogo simples e divertido, onde dois jogado
 
 ## Verificação de Palavras e Prefixos
 
-Para validar as palavras e os prefixos, foi utilizada a [API Dicionáriio Aberto](https://api.dicionario-aberto.net/index.html). Essa API permite confirmar se uma determinada sequência de caracteres constitui o início de uma palavra. 
+Para validar as palavras e os prefixos, foi utilizada a [API Dicionário Aberto](https://api.dicionario-aberto.net/index.html). Essa API permite confirmar se uma determinada sequência de caracteres constitui o início de uma palavra. 
 
 Além da API, foram utilizados alguns prefixos selecionados manualmente. Essa seleção foi feita com o intuito de balancear o jogo e para também validar palavras com menos de três letras, pois a API não cobre esse caso.
 
