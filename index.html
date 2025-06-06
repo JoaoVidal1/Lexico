@@ -8,22 +8,15 @@
 </head>
 <body>
     <header>
-        <h1 id="title">
-            <span>L</span>
-            <span>É</span>
-            <span>X</span>
-            <span>I</span>
-            <span>C</span>
-            <span>O</span>
-        </h1>
+        <h1 id="title">LÉXICO</h1>
     </header>
     <main>
-        <form onsubmit="novaPartida(event)" id="comecar-partida" class="popup">
-            <label for="tempo-rodada" class="label-home">Quantos segundos um jogador terá por jogada? (5 - 59)</label>
-            <input type="number" name="input-tempo" id="input-tempo" min="5" max="59" placeholder="10" value="10" required>
-            <input type="submit" value="Jogar" id="jogar">
-            </div>
-        </form>
+        <section>
+            <form onsubmit="novaPartida(event)" id="comecar-partida" class="popup">
+                <label for="tempo-rodada" class="label-home">Quantos segundos um jogador terá por jogada? (5 - 59)</label>
+                <input type="number" name="input-tempo" id="input-tempo" min="5" max="59" placeholder="10" value="10" required>
+                <input type="submit" value="Jogar" id="jogar">
+            </form>
         </section>
         <div id="countdown"></div>
         <div id="pontos-red" class="pontos"></div>

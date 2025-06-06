@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&display=swap');
 
 :root {
     --bg-color: #080808;
@@ -39,6 +39,7 @@ header {
 h1 {
     font-size: 8dvh;
     text-shadow: 0px 0px 3px var(--fg-color);
+    letter-spacing: 10px;
 }
 
 .input-char {
@@ -135,12 +136,17 @@ main {
 
 .label-home {
     margin-bottom: 5dvh;
+    inline-size: 80vw;
+    max-inline-size: 54rem;
+    overflow-wrap: break-word;
+    text-align: center;
 }
 
 #input-tempo {
     font-size: large;
     border: 2px solid white;
     padding: 10px;
+    text-align: center;
     border-radius: 15px;
 }
 
@@ -154,4 +160,299 @@ main {
     border: 2px solid var(--red);
     padding: 20px;
     border-radius: 20px;
+}
+
+#btn-ajuda {
+    margin-top: 3dvh;
+}
+
+#btn-ajuda:hover {
+    cursor: pointer;
+}
+
+/* Media Queries para Responsividade */
+
+/* Tablets em landscape e desktops pequenos */
+@media screen and (max-width: 1024px) {
+    h1 {
+        font-size: 7dvh;
+    }
+    
+    .input-char {
+        width: 8dvw;
+        height: 8dvw;
+        font-size: 5.5dvw;
+        border-width: 0.5dvw;
+    }
+    
+    main {
+        width: 90dvw;
+    }
+    
+    #countdown {
+        font-size: x-large;
+        bottom: 12dvh;
+        padding: 25px;
+    }
+}
+
+/* Tablets em portrait */
+@media screen and (max-width: 768px) {
+    header {
+        margin-top: 8dvh;
+    }
+    
+    h1 {
+        font-size: 6dvh;
+    }
+    
+    .input-char {
+        width: 10dvw;
+        height: 10dvw;
+        font-size: 7dvw;
+        border-width: 0.6dvw;
+    }
+    
+    main {
+        margin-top: 8dvh;
+        width: 95dvw;
+        height: 12dvw;
+    }
+    
+    .popup {
+        font-size: x-large;
+        padding: 20px;
+    }
+    
+    .label-home {
+        margin-bottom: 4dvh;
+        text-align: center;
+        padding: 0 20px;
+    }
+    
+    #input-tempo {
+        font-size: medium;
+        padding: 15px;
+    }
+    
+    #jogar {
+        margin-top: 4dvh;
+        padding: 15px 25px;
+        font-size: large;
+    }
+    
+    #btn-ajuda {
+        margin-top: 2dvh;
+        font-size: medium;
+    }
+    
+    #countdown {
+        bottom: 10dvh;
+        font-size: large;
+        padding: 20px;
+    }
+    
+    .pontos {
+        width: 2dvw;
+        height: 6dvh;
+        font-size: x-large;
+    }
+}
+
+/* Smartphones */
+@media screen and (max-width: 480px) {
+    header {
+        margin-top: 6dvh;
+    }
+    
+    h1 {
+        font-size: 5dvh;
+    }
+    
+    .input-char {
+        width: 12dvw;
+        height: 12dvw;
+        font-size: 8dvw;
+        border-width: 0.8dvw;
+    }
+    
+    main {
+        margin-top: 6dvh;
+        width: 98dvw;
+        height: 15dvw;
+        flex-wrap: wrap;
+        gap: 2dvw;
+    }
+    
+    .popup {
+        font-size: large;
+        padding: 15px;
+    }
+    
+    #regras-do-jogo {
+        padding: 20px;
+        max-width: 90vw;
+        max-height: 80vh;
+        overflow-y: auto;
+    }
+    
+    #regras-do-jogo h2 {
+        font-size: x-large;
+        margin-bottom: 15px;
+    }
+    
+    #regras-do-jogo h3 {
+        font-size: large;
+        margin: 15px 0 10px 0;
+    }
+    
+    #regras-do-jogo p, 
+    #regras-do-jogo li {
+        font-size: medium;
+        line-height: 1.4;
+    }
+    
+    .label-home {
+        margin-bottom: 3dvh;
+        font-size: medium;
+        text-align: center;
+        padding: 0 15px;
+    }
+    
+    #input-tempo {
+        font-size: medium;
+        padding: 12px;
+        width: 80px;
+    }
+    
+    #jogar {
+        margin-top: 3dvh;
+        padding: 12px 20px;
+        font-size: medium;
+    }
+    
+    #btn-ajuda {
+        margin-top: 2dvh;
+        font-size: small;
+        padding: 8px 15px;
+    }
+    
+    #countdown {
+        bottom: 8dvh;
+        font-size: medium;
+        padding: 15px;
+    }
+    
+    .pontos {
+        width: 3dvw;
+        height: 7dvh;
+        font-size: large;
+    }
+    
+    #detalhes-vitoria {
+        font-size: medium;
+        padding: 20px;
+        line-height: 1.6;
+    }
+    
+    #mensagem-input {
+        font-size: medium;
+        text-align: center;
+        padding: 20px;
+        line-height: 1.5;
+    }
+}
+
+/* Smartphones muito pequenos */
+@media screen and (max-width: 320px) {
+    h1 {
+        font-size: 4dvh;
+    }
+    
+    .input-char {
+        width: 14dvw;
+        height: 14dvw;
+        font-size: 9dvw;
+        border-width: 1dvw;
+    }
+    
+    main {
+        gap: 1.5dvw;
+    }
+    
+    .popup {
+        font-size: medium;
+        padding: 10px;
+    }
+    
+    .label-home {
+        font-size: small;
+    }
+    
+    #input-tempo {
+        font-size: small;
+        padding: 10px;
+        width: 70px;
+    }
+    
+    #jogar {
+        padding: 10px 15px;
+        font-size: small;
+    }
+    
+    #btn-ajuda {
+        font-size: x-small;
+        padding: 6px 12px;
+    }
+    
+    #countdown {
+        font-size: small;
+        padding: 12px;
+    }
+    
+    .pontos {
+        width: 4dvw;
+        height: 8dvh;
+        font-size: medium;
+    }
+}
+
+/* Orientação landscape para smartphones */
+@media screen and (max-height: 500px) and (orientation: landscape) {
+    header {
+        margin-top: 3dvh;
+    }
+    
+    h1 {
+        font-size: 4dvh;
+    }
+    
+    main {
+        margin-top: 3dvh;
+        height: 8dvw;
+    }
+    
+    .input-char {
+        width: 6dvw;
+        height: 6dvw;
+        font-size: 4dvw;
+    }
+    
+    #countdown {
+        bottom: 5dvh;
+        font-size: medium;
+        padding: 10px;
+    }
+    
+    .pontos {
+        height: 10dvh;
+    }
+    
+    .popup {
+        font-size: medium;
+    }
+    
+    #regras-do-jogo {
+        max-height: 85vh;
+    }
 }
