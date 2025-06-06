@@ -147,7 +147,7 @@ async function verificarPalavra() {
     }
     
     // Verificar se a palavra atual é uma palavra completa (jogador perde)
-    if (GAMESTATE.currentWord.length >= 3) {
+    if (GAMESTATE.currentWord.length >= 5) {
         const palavraExiste = await corresponderExatamente();
         
         if (palavraExiste) {
@@ -162,7 +162,7 @@ async function verificarPalavra() {
     // Verificar se é um prefixo válido (pode continuar)
     const ehPrefixoValido = await corresponderPrefixo();
     
-    if (!ehPrefixoValido) {
+    if (GAMESTATE.currentWord.length > 2 && !ehPrefixoValido) {
         // Não é nem palavra nem prefixo válido - jogador ANTERIOR perde
         const jogadorPerdedor = GAMESTATE.currentPlayer === "red" ? "blue" : "red";
         const vencedor = GAMESTATE.currentPlayer;
@@ -211,7 +211,7 @@ async function vitoriaRound(caso, vencedor) {
                 DOM.victoryDetails.innerHTML += `Não é possível continuar a partir de "${GAMESTATE.currentWord}"`;
                 break;
             case 2:
-                DOM.victoryDetails.innerHTML += `O jogador anterior completou a palavra <br><a id="link-sentido" href="https://www.dicio.com.br/pesquisa.php?q=${GAMESTATE.currentWord}/">${GAMESTATE.currentWord}</a>`;
+                DOM.victoryDetails.innerHTML += `O jogador ${vencedor === "red" ? "azul" : "vermelho"} digitou a palavra <br><a id="link-sentido" href="https://www.dicio.com.br/pesquisa.php?q=${GAMESTATE.currentWord}/">"${GAMESTATE.currentWord}"</a>`;
                 document.getElementById("link-sentido").style.color = vencedor === "red" ? CONFIG.colors.red : CONFIG.colors.blue;
                 break;
             case 3:
@@ -246,7 +246,7 @@ function proximoRound() {
 }
 
 function vitoriaJogo() {
-    DOM.victoryDetails.innerHTML = `PARABÉNS JOGADOR <span style="color:${GAMESTATE.points.red  > GAMESTATE.points.blue ? CONFIG.colors.red : CONFIG.colors.blue}">${GAMESTATE.points.red > GAMESTATE.points.blue ? "VERMELHO" : "AZUL"}</span>, VOCÊ VENCEU!<br><span style="color:${CONFIG.colors.red}">${GAMESTATE.points.red+0.75}</span> : <span style="color:${CONFIG.colors.blue}">${GAMESTATE.points.blue-0.75}</span>`;
+    DOM.victoryDetails.innerHTML = `PARABÉNS JOGADOR <span style="color:${GAMESTATE.points.red  > GAMESTATE.points.blue ? CONFIG.colors.red : CONFIG.colors.blue}">${GAMESTATE.points.red > GAMESTATE.points.blue ? "VERMELHO" : "AZUL"}</span>, VOCÊ VENCEU!<br><span style="color:${CONFIG.colors.red}">${GAMESTATE.points.red}</span> : <span style="color:${CONFIG.colors.blue}">${GAMESTATE.points.blue}</span>`;
     DOM.victoryModal.style.display = "flex";
     GAMESTATE.currentPlayer = "red";
     GAMESTATE.currentWord = "";
