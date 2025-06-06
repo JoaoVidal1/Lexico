@@ -136,8 +136,7 @@ main {
 
 .label-home {
     margin-bottom: 5dvh;
-    inline-size: 80vw;
-    max-inline-size: 54rem;
+    inline-size: 70vw;
     overflow-wrap: break-word;
     text-align: center;
 }

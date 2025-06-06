@@ -1,14 +1,4 @@
 const CONFIG = {
-    api: {
-        pt: {
-            prefix: "https://api.dicionario-aberto.net/prefix/",
-            word: "https://api.dicionario-aberto.net/near/"
-        },
-        en: {
-            prefix: "",
-            word: ""
-        }
-    },
     colors: {
         red : "#ff2b47",
         blue : "#992bff",
@@ -18,7 +8,7 @@ const CONFIG = {
     charNotAllowed: /[áâéêíóôúç]/gi,
     maxPoints: 15,
     maxTime: 15,
-    lang: document.documentElement.lang
+    lang: document.getElementById('select-lang').value
 };
 
 const GAMESTATE = {
@@ -149,6 +139,7 @@ function novaLetra(box) {
 }
 
 async function verificarPalavra() {
+    console.log(CONFIG.lang)
     async function matchWord() {
         switch (CONFIG.lang) {
             case "pt":
@@ -410,6 +401,7 @@ function atualizarLangPagina() {
     const langSelecionado = select.value;
     
     document.documentElement.setAttribute('lang', langSelecionado);
+    CONFIG.lang = langSelecionado;
     DOM.victoryDetails.innerHTML = `O idioma do jogo foi alterado, portanto a partida será reiniciada`;
     DOM.victoryModal.style.display = "flex";
     GAMESTATE.currentPlayer = "red";
