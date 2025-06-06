@@ -96,69 +96,83 @@ function novaLetra(box) {
     cBox.style.boxShadow = `none`
     GAMESTATE.currentWord += cBox.value.toLowerCase();
 
-    
-    GAMESTATE.currentPlayer = 
-    GAMESTATE.currentPlayer === "red" ? "blue" : "red";
+    // Trocar jogador ANTES de verificar a palavra
+    GAMESTATE.currentPlayer = GAMESTATE.currentPlayer === "red" ? "blue" : "red";
     let newColor = CONFIG.colors[GAMESTATE.currentPlayer];
 
-        verificarPalavra().then(() => {
-            if (GAMESTATE.boxIndex < 8) {
-                let nBox = document.getElementById(`char${GAMESTATE.boxIndex + 1}`);
-                nBox.style.borderColor = newColor;
-                nBox.style.boxShadow = `0px 0px 1.5dvw ${newColor}`
-                nBox.disabled = false;
-                nBox.focus();
-                if (GAMESTATE.continueTurn) startTurnTimer();
-            }
-        });
+    verificarPalavra().then(() => {
+        if (GAMESTATE.boxIndex < 8 && GAMESTATE.continueTurn) {
+            let nBox = document.getElementById(`char${GAMESTATE.boxIndex + 1}`);
+            nBox.style.borderColor = newColor;
+            nBox.style.boxShadow = `0px 0px 1.5dvw ${newColor}`
+            nBox.disabled = false;
+            nBox.focus();
+            startTurnTimer();
+        }
+    });
 }
 
 async function verificarPalavra() {
-
     async function corresponderExatamente() {
         try {
             const resposta = await fetch(`https://api.dicionario-aberto.net/near/${GAMESTATE.currentWord}`);
             const dados = await resposta.json();
-            const palavrasValidas = await dados
+            const palavrasValidas = dados
                 .filter(e => e.length === GAMESTATE.currentWord.length)
                 .map(element => element.replace(CONFIG.charNotAllowed, match => caracteresUnicos[match.toLowerCase()] || match))
                 .filter(e => e === GAMESTATE.currentWord);
-            console.log(palavrasValidas)
-            if (palavrasValidas.length > 0) {
-                    return true;
-            }
-
-            else return false;
+            console.log(palavrasValidas);
+            return palavrasValidas.length > 0;
         } catch (error) {
-          console.error(error);
+            console.error(error);
+            return false;
         }
     }
 
     async function corresponderPrefixo() {
-        const variacoes = await gerarVariacoes(GAMESTATE.currentWord);
-        for (let word of variacoes) {
-            const resposta = await fetch(`https://api.dicionario-aberto.net/prefix/${word}`);
-            const dados = await resposta.json();
-            if (dados.length !== 0) {
-                return false
+        try {
+            const variacoes = await gerarVariacoes(GAMESTATE.currentWord);
+            for (let word of variacoes) {
+                const resposta = await fetch(`https://api.dicionario-aberto.net/prefix/${word}`);
+                const dados = await resposta.json();
+                if (dados.length > 0) {
+                    return true; // É um prefixo válido
+                }
             }
+            return false; // Não é um prefixo válido
+        } catch (error) {
+            console.error(error);
+            return false;
         }
-        return true
     }
     
-    if (GAMESTATE.currentWord.length > 4) {
+    // Verificar se a palavra atual é uma palavra completa (jogador perde)
+    if (GAMESTATE.currentWord.length >= 3) {
         const palavraExiste = await corresponderExatamente();
-    
+        
         if (palavraExiste) {
-            await vitoriaRound(2, GAMESTATE.currentPlayer === "red" ? "AZUL" : "VERMELHO");
+            // Jogador ANTERIOR perde (digitou uma palavra completa)
+            const jogadorPerdedor = GAMESTATE.currentPlayer === "red" ? "blue" : "red";
+            const vencedor = GAMESTATE.currentPlayer;
+            await vitoriaRound(2, vencedor);
+            return;
         }
-        else if (GAMESTATE.currentWord.length > 2) {
-            const prefixoInvalido = await corresponderPrefixo();
-            if (prefixoInvalido) {
-                await vitoriaRound(1 , GAMESTATE.currentPlayer === "red" ? "AZUL" : "VERMELHO");
-            }
-            else if (GAMESTATE.boxIndex == 8) vitoriaRound (0, GAMESTATE.currentPlayer)
-        }
+    }
+    
+    // Verificar se é um prefixo válido (pode continuar)
+    const ehPrefixoValido = await corresponderPrefixo();
+    
+    if (!ehPrefixoValido) {
+        // Não é nem palavra nem prefixo válido - jogador ANTERIOR perde
+        const jogadorPerdedor = GAMESTATE.currentPlayer === "red" ? "blue" : "red";
+        const vencedor = GAMESTATE.currentPlayer;
+        await vitoriaRound(1, vencedor);
+        return;
+    }
+    
+    // Se chegou no fim das casas sem formar palavra nem prefixo inválido
+    if (GAMESTATE.boxIndex >= 8) {
+        await vitoriaRound(0, null); // Empate
     }
 }
 
@@ -166,39 +180,49 @@ async function vitoriaRound(caso, vencedor) {
     GAMESTATE.continueTurn = false;
     DOM.countdown.style.display = 'none';
     travarInput();
+    
     let pontosRodada = 9 - GAMESTATE.boxIndex;
-    DOM.victoryDetails.innerHTML = `<span id="cor-vitoria">${pontosRodada} PONTOS PARA O ${vencedor}</span><br>`;
-
-    if (caso == 3) pontosRodada--;
-    if (caso != 0) {
-        vencedor == "VERMELHO" ? GAMESTATE.points.red += pontosRodada : GAMESTATE.points.blue += pontosRodada;
-        GAMESTATE.currentPlayer = vencedor === "VERMELHO" ? "red" : "blue";
-    }
-    if (GAMESTATE.points.blue > CONFIG.maxPoints || GAMESTATE.points.red > CONFIG.maxPoints) vitoriaJogo();
-
-    else {
+    
+    if (caso === 0) {
+        // Empate
+        DOM.victoryDetails.innerHTML = `Houve um empate<br><span style="color:${GAMESTATE.currentPlayer === "red" ? CONFIG.colors.red : CONFIG.colors.blue}">'${GAMESTATE.currentWord}'</span> não é uma palavra, mas é possível prosseguir a partir dela<br><a id="link-sentido" href="https://www.dicio.com.br/pesquisa.php?q=${GAMESTATE.currentWord}">Palavras possíveis</a>`;
+        document.getElementById("link-sentido").style.color = "#00ffbf";
+    } else {
+        // Alguém ganhou
+        const nomeVencedor = vencedor === "red" ? "VERMELHO" : "AZUL";
+        DOM.victoryDetails.innerHTML = `<span id="cor-vitoria">${pontosRodada} PONTOS PARA O ${nomeVencedor}</span><br>`;
+        
+        // Adicionar pontos ao vencedor
+        if (vencedor === "red") {
+            GAMESTATE.points.red += pontosRodada;
+        } else {
+            GAMESTATE.points.blue += pontosRodada;
+        }
+        
+        // Verificar vitória do jogo
+        if (GAMESTATE.points.blue > CONFIG.maxPoints || GAMESTATE.points.red > CONFIG.maxPoints) {
+            vitoriaJogo();
+            return;
+        }
+        
+        // Mensagens específicas por caso
         switch (caso) {
-            case 0:
-                DOM.victoryDetails.innerHTML = `Houve um empate<br><span style="color:${GAMESTATE.currentPlayer === "red" ? CONFIG.colors.red : CONFIG.colors.blue}">'${GAMESTATE.currentWord}'</span> não é uma palavra, mas é possivei prosseguir a partir dela<br><a id="link-sentido" href="https://www.dicio.com.br/pesquisa.php?q=${GAMESTATE.currentWord}">Palavras possiveis</a>`;
-                document.getElementById("link-sentido").style.color = "#00ffbf";
-                break
             case 1:   
-                DOM.victoryDetails.innerHTML += `Não é permitido começar com "${GAMESTATE.currentWord}"`;
-                break
+                DOM.victoryDetails.innerHTML += `Não é possível continuar a partir de "${GAMESTATE.currentWord}"`;
+                break;
             case 2:
-                DOM.victoryDetails.innerHTML += `O jogador ${GAMESTATE.currentPlayer} escreveu <br><a id="link-sentido" href="https://www.dicio.com.br/pesquisa.php?q=${GAMESTATE.currentWord}/">${GAMESTATE.currentWord}</a>`;
-                document.getElementById("link-sentido").style.color = vencedor === "AZUL" ? CONFIG.colors.red : CONFIG.colors.blue;
-                break
+                DOM.victoryDetails.innerHTML += `O jogador anterior completou a palavra <br><a id="link-sentido" href="https://www.dicio.com.br/pesquisa.php?q=${GAMESTATE.currentWord}/">${GAMESTATE.currentWord}</a>`;
+                document.getElementById("link-sentido").style.color = vencedor === "red" ? CONFIG.colors.red : CONFIG.colors.blue;
+                break;
             case 3:
-                DOM.victoryDetails.innerHTML += `O jogador ${GAMESTATE.currentPlayer} demorou demais<br>Palavras que começam com <a id="link-sentido" href="https://dicionario-aberto.net/ss_search/prefix/${GAMESTATE.currentWord}">'${GAMESTATE.currentWord}'</a>`;
-                document.getElementById("link-sentido").style.color = vencedor === "AZUL" ? CONFIG.colors.red : CONFIG.colors.blue;
-                break
-            default:
+                DOM.victoryDetails.innerHTML += `O jogador anterior demorou demais<br>Palavras que começam com <a id="link-sentido" href="https://dicionario-aberto.net/ss_search/prefix/${GAMESTATE.currentWord}">'${GAMESTATE.currentWord}'</a>`;
+                document.getElementById("link-sentido").style.color = vencedor === "red" ? CONFIG.colors.red : CONFIG.colors.blue;
                 break;
         }
+        
+        document.getElementById("cor-vitoria").style.color = vencedor === "red" ? CONFIG.colors.red : CONFIG.colors.blue;
     }
-
-    if (caso != 0) document.getElementById("cor-vitoria").style.color = vencedor === "VERMELHO" ? CONFIG.colors.red : CONFIG.colors.blue;
+    
     DOM.victoryModal.style.display = "flex";
 }
 
