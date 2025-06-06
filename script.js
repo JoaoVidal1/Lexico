@@ -106,6 +106,7 @@ function resetRound() {
     DOM.firstBox.disabled = false;
     DOM.firstBox.style.borderColor = GAMESTATE.currentPlayer === "red" ? CONFIG.colors.red : CONFIG.colors.blue;
     DOM.firstBox.style.boxShadow = `0px 0px 1.5dvw ${GAMESTATE.currentPlayer === "red" ? CONFIG.colors.red : CONFIG.colors.blue}`;
+    DOM.firstBox.focus();
 }
 
 function novaLetra(box) {
@@ -202,10 +203,8 @@ async function verificarPalavra() {
                     return false;
                 }
             case "en":
-                const url = `https://api.datamuse.com/words?sp=${encodeURIComponent(GAMESTATE.currentWord)}*&max=1`;
-
                 try {
-                    const res = await fetch(url);
+                    const res = await fetch(`https://api.datamuse.com/words?sp=${GAMESTATE.currentWord}*&max=1`);
                     if (!res.ok) {
                     throw new Error('Erro ao consultar Datamuse API');
                     }
@@ -220,7 +219,6 @@ async function verificarPalavra() {
                 }
             default:
                 return true
-                break;
         }
     }
     
