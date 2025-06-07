@@ -1,23 +1,38 @@
 <!DOCTYPE html>
-<html lang="pt">
+<html lang="pt" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style.css">
-    <title>Lexico: Jogar</title>
+    <link rel="shortcut icon" href="assets/favicon.svg" sizes="any" type="image/svg">
+    <title>Lexicon: Jogar</title>
 </head>
 <body>
     <header>
-        <h1 id="title">LÉXICO</h1>
-        <select name="lang" id="select-lang">
-            <option value="pt">🇧🇷 Português</option>
-            <option value="en">🇺🇸 English</option>
-        </select>
+        <nav>
+            <h1 id="title">LEXICON</h1>
+            <div class="nav-container">
+                <div class="nav-item">
+                    <label for="theme-toggle">Tema</label>
+                    <label class="switch">
+                        <input type="checkbox" id="theme-toggle" name="theme-toggle">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+                <div class="nav-item">
+                    <label for="lang-toggle">Idioma</label>
+                    <select name="lang" id="select-lang">
+                        <option value="pt">🇧🇷 Português</option>
+                        <option value="en">🇺🇸 English</option>
+                    </select>
+                </div>
+            </div>
+        </nav>
     </header>
     <main>
         <section>
             <form onsubmit="novaPartida(event)" id="comecar-partida" class="popup">
-                <label for="tempo-rodada" class="label-home">Quantos segundos um jogador terá por jogada? (5 - 59)</label>
+                <label for="tempo-rodada" class="label-home">Defina o tempo máximo de cada jogada (5 - 59)</label>
                 <input type="number" name="input-tempo" id="input-tempo" min="5" max="59" placeholder="10" value="10" required>
                 <input type="submit" value="Jogar" id="jogar">
             </form>

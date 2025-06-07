@@ -102,7 +102,7 @@ function resetRound() {
     DOM.firstBox.value = "";
     DOM.firstBox.disabled = false;
     DOM.firstBox.style.borderColor = GAMESTATE.currentPlayer === "red" ? CONFIG.colors.red : CONFIG.colors.blue;
-    DOM.firstBox.style.boxShadow = `0px 0px 1.5dvw ${GAMESTATE.currentPlayer === "red" ? CONFIG.colors.red : CONFIG.colors.blue}`;
+    DOM.firstBox.style.boxShadow = `0px 0px 1dvw ${GAMESTATE.currentPlayer === "red" ? CONFIG.colors.red : CONFIG.colors.blue}`;
     DOM.firstBox.focus();
 }
 
@@ -137,7 +137,7 @@ function novaLetra(box) {
         if (GAMESTATE.boxIndex < 8 && GAMESTATE.continueTurn) {
             let nBox = document.getElementById(`char${GAMESTATE.boxIndex + 1}`);
             nBox.style.borderColor = newColor;
-            nBox.style.boxShadow = `0px 0px 1.3dvw ${newColor}`
+            nBox.style.boxShadow = `0px 0px 1dvw ${newColor}`
             nBox.disabled = false;
             nBox.focus();
             startTurnTimer();
@@ -427,15 +427,27 @@ function atualizarLangPagina() {
     
     document.documentElement.setAttribute('lang', langSelecionado);
     CONFIG.lang = langSelecionado;
-    DOM.victoryDetails.innerHTML = `O idioma do jogo foi alterado, portanto a partida será reiniciada`;
-    DOM.victoryModal.style.display = "flex";
     GAMESTATE.currentPlayer = "red";
     GAMESTATE.currentWord = "";
     GAMESTATE.points.red = 0;
     GAMESTATE.points.blue = 0;
     GAMESTATE.newGame = true;
-    novaPartida();
+    document.getElementById("comecar-partida").style.display = 'flex';
 }
 
 // Adiciona o event listener para mudança no select
 document.getElementById('select-lang').addEventListener('change', atualizarLangPagina);
+
+function mudarTema() {
+    let tema = document.documentElement.getAttribute("data-theme");
+
+    if (tema === "light") {
+        document.documentElement.setAttribute("data-theme", "dark");
+        localStorage.setItem("theme", "dark");
+    } else {
+        document.documentElement.setAttribute("data-theme", "light");
+        localStorage.setItem("theme", "light");
+    }
+}
+
+document.getElementById("theme-toggle").addEventListener('change', mudarTema);
