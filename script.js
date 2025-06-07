@@ -283,15 +283,17 @@ async function vitoriaRound(caso, vencedor) {
         
         // Mensagens específicas por caso
         switch (caso) {
-            case 1:   
-                DOM.victoryDetails.innerHTML += `Não é possível continuar a partir de "${GAMESTATE.currentWord}"`;
+            case 1:
+                let previous = GAMESTATE.currentWord.split("").toSpliced(-1).join("");
+                DOM.victoryDetails.innerHTML += `Não é possível continuar a partir de "${GAMESTATE.currentWord}" <br><a id="link-sentido" href="${CONFIG.lang === "pt" ? `https://www.dicio.com.br/palavras-comecam-${previous}` : `https://www.merriam-webster.com/wordfinder/classic/begins/all/-1/${previous}/1`}">Palavras que começam por "${previous}"</a>`;
+                document.getElementById("link-sentido").style.color = vencedor === "red" ? CONFIG.colors.red : CONFIG.colors.blue;
                 break;
             case 2:
-                DOM.victoryDetails.innerHTML += `O jogador ${vencedor === "red" ? "azul" : "vermelho"} digitou a palavra <br><a id="link-sentido" href="https://www.dicio.com.br/pesquisa.php?q=${GAMESTATE.currentWord}/">"${GAMESTATE.currentWord}"</a>`;
+                DOM.victoryDetails.innerHTML += `O jogador ${vencedor === "red" ? "azul" : "vermelho"} digitou a palavra <br><a id="link-sentido" href="${CONFIG.lang === "pt" ? `https://www.dicio.com.br/${GAMESTATE.currentWord}` : `https://dictionary.cambridge.org/dictionary/english/${GAMESTATE.currentWord}`}">${GAMESTATE.currentWord}</a>`;
                 document.getElementById("link-sentido").style.color = vencedor === "red" ? CONFIG.colors.red : CONFIG.colors.blue;
                 break;
             case 3:
-                DOM.victoryDetails.innerHTML += `O jogador anterior demorou demais<br>Palavras que começam com <a id="link-sentido" href="https://dicionario-aberto.net/ss_search/prefix/${GAMESTATE.currentWord}">'${GAMESTATE.currentWord}'</a>`;
+                DOM.victoryDetails.innerHTML += `O jogador anterior demorou demais<br><a id="link-sentido" href="${CONFIG.lang === "pt" ? `https://www.dicio.com.br/palavras-comecam-${GAMESTATE.currentWord}` : `https://www.merriam-webster.com/wordfinder/classic/begins/all/-1/${GAMESTATE.currentWord}/1`}">Palavras que começam por "${GAMESTATE.currentWord}"</a>`;
                 document.getElementById("link-sentido").style.color = vencedor === "red" ? CONFIG.colors.red : CONFIG.colors.blue;
                 break;
         }
