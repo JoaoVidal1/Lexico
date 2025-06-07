@@ -137,7 +137,7 @@ function novaLetra(box) {
         if (GAMESTATE.boxIndex < 8 && GAMESTATE.continueTurn) {
             let nBox = document.getElementById(`char${GAMESTATE.boxIndex + 1}`);
             nBox.style.borderColor = newColor;
-            nBox.style.boxShadow = `0px 0px 1.5dvw ${newColor}`
+            nBox.style.boxShadow = `0px 0px 1.3dvw ${newColor}`
             nBox.disabled = false;
             nBox.focus();
             startTurnTimer();

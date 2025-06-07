@@ -24,7 +24,7 @@
 }
 
 body {
-    height: 100dvh;
+    height: 100vh;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -32,33 +32,48 @@ body {
 }
 
 header {
-    margin-top: 10dvh;
+    margin-top: 10vh;
     z-index: 10;
 }
 
 h1 {
-    font-size: 8dvh;
+    font-size: 8vh;
     text-shadow: 0px 0px 3px var(--fg-color);
     letter-spacing: 10px;
 }
 
+#select-lang {
+    position: fixed;
+    right: 15px;
+    top: 15px;
+    padding: 15px;
+    border: 2px solid transparent;
+    border-radius: 15px;
+}
+
+#select-lang:hover {
+    box-shadow: 0px 0px 1vw white;
+    border-color: white;
+    cursor: pointer;
+}
+
 .input-char {
     background-color: #080808;
-    border: 0.4dvw solid var(--fg-color);
+    border: 0.4vw solid var(--fg-color);
     border-radius: 25%;
     caret-color: transparent;
-    width: 7dvw;
-    height: 7dvw;
+    width: 7vw;
+    height: 7vw;
     text-align: center;
-    font-size: 5dvw;
+    font-size: 5vw;
     text-transform: uppercase;
 }
 
 main {
     display: flex;
-    margin-top: 10dvh;
-    width: 80dvw;
-    height: 10dvw;
+    margin-top: 10vh;
+    width: 80vw;
+    height: 10vw;
     justify-content: space-around;
     align-items: center;
 }
@@ -70,8 +85,8 @@ main {
     font-size: xx-large;
     position: fixed;
     font-weight: 400;
-    width: 100dvw;
-    height: 100dvh;
+    width: 100vw;
+    height: 100vh;
     top: 0;
     left: 0;
     background-color: #000000d8;
@@ -104,8 +119,8 @@ main {
     position: fixed;
     font-weight: 400;
     bottom: 0px;
-    width: 1dvw;
-    height: 5dvh;
+    width: 1vw;
+    height: 5vh;
 }
 
 #pontos-red {
@@ -121,7 +136,7 @@ main {
 #countdown {
     font-size: xx-large;
     position: fixed;
-    bottom: 15dvh;
+    bottom: 15vh;
     border: 2px solid transparent;
     border-radius: 20px;
     padding: 30px;
@@ -135,7 +150,7 @@ main {
 }
 
 .label-home {
-    margin-bottom: 5dvh;
+    margin-bottom: 5vh;
     inline-size: 70vw;
     overflow-wrap: break-word;
     text-align: center;
@@ -149,20 +164,31 @@ main {
     border-radius: 15px;
 }
 
+#input-tempo:hover {
+    cursor: pointer;
+    box-shadow: 0px 0px 1vw white;
+}
+
 :is(select, input):open {
     background-color: black;
 }
 
 #jogar {
-    margin-top: 5dvh;
+    margin-top: 5vh;
     background-color: black;
     border: 2px solid var(--red);
     padding: 20px;
     border-radius: 20px;
 }
 
+#jogar:hover {
+    cursor: pointer;
+    background-color: var(--red);
+    box-shadow: 0px 0px 1vw var(--red);
+}
+
 #btn-ajuda {
-    margin-top: 3dvh;
+    margin-top: 3vh;
 }
 
 #btn-ajuda:hover {
@@ -174,23 +200,23 @@ main {
 /* Tablets em landscape e desktops pequenos */
 @media screen and (max-width: 1024px) {
     h1 {
-        font-size: 7dvh;
+        font-size: 7vh;
     }
     
     .input-char {
-        width: 8dvw;
-        height: 8dvw;
-        font-size: 5.5dvw;
-        border-width: 0.5dvw;
+        width: 8vw;
+        height: 8vw;
+        font-size: 5.5vw;
+        border-width: 0.5vw;
     }
     
     main {
-        width: 90dvw;
+        width: 90vw;
     }
     
     #countdown {
         font-size: x-large;
-        bottom: 12dvh;
+        bottom: 12vh;
         padding: 25px;
     }
 }
@@ -198,24 +224,24 @@ main {
 /* Tablets em portrait */
 @media screen and (max-width: 768px) {
     header {
-        margin-top: 8dvh;
+        margin-top: 8vh;
     }
     
     h1 {
-        font-size: 6dvh;
+        font-size: 6vh;
     }
     
     .input-char {
-        width: 10dvw;
-        height: 10dvw;
-        font-size: 7dvw;
-        border-width: 0.6dvw;
+        width: 10vw;
+        height: 10vw;
+        font-size: 7vw;
+        border-width: 0.6vw;
     }
     
     main {
-        margin-top: 8dvh;
-        width: 95dvw;
-        height: 12dvw;
+        margin-top: 8vh;
+        width: 95vw;
+        height: 12vw;
     }
     
     .popup {
@@ -224,7 +250,7 @@ main {
     }
     
     .label-home {
-        margin-bottom: 4dvh;
+        margin-bottom: 4vh;
         text-align: center;
         padding: 0 20px;
     }
@@ -235,25 +261,25 @@ main {
     }
     
     #jogar {
-        margin-top: 4dvh;
+        margin-top: 4vh;
         padding: 15px 25px;
         font-size: large;
     }
     
     #btn-ajuda {
-        margin-top: 2dvh;
+        margin-top: 2vh;
         font-size: medium;
     }
     
     #countdown {
-        bottom: 10dvh;
+        bottom: 10vh;
         font-size: large;
         padding: 20px;
     }
     
     .pontos {
-        width: 2dvw;
-        height: 6dvh;
+        width: 2vw;
+        height: 6vh;
         font-size: x-large;
     }
 }
@@ -261,26 +287,26 @@ main {
 /* Smartphones */
 @media screen and (max-width: 480px) {
     header {
-        margin-top: 6dvh;
+        margin-top: 6vh;
     }
     
     h1 {
-        font-size: 5dvh;
+        font-size: 5vh;
     }
     
     .input-char {
-        width: 12dvw;
-        height: 12dvw;
-        font-size: 8dvw;
-        border-width: 0.8dvw;
+        width: 12vw;
+        height: 12vw;
+        font-size: 8vw;
+        border-width: 0.8vw;
     }
     
     main {
-        margin-top: 6dvh;
-        width: 98dvw;
-        height: 15dvw;
+        margin-top: 6vh;
+        width: 98vw;
+        height: 15vw;
         flex-wrap: wrap;
-        gap: 2dvw;
+        gap: 2vw;
     }
     
     .popup {
@@ -312,7 +338,7 @@ main {
     }
     
     .label-home {
-        margin-bottom: 3dvh;
+        margin-bottom: 3vh;
         font-size: medium;
         text-align: center;
         padding: 0 15px;
@@ -325,26 +351,26 @@ main {
     }
     
     #jogar {
-        margin-top: 3dvh;
+        margin-top: 3vh;
         padding: 12px 20px;
         font-size: medium;
     }
     
     #btn-ajuda {
-        margin-top: 2dvh;
+        margin-top: 2vh;
         font-size: small;
         padding: 8px 15px;
     }
     
     #countdown {
-        bottom: 8dvh;
+        bottom: 8vh;
         font-size: medium;
         padding: 15px;
     }
     
     .pontos {
-        width: 3dvw;
-        height: 7dvh;
+        width: 3vw;
+        height: 7vh;
         font-size: large;
     }
     
@@ -365,18 +391,18 @@ main {
 /* Smartphones muito pequenos */
 @media screen and (max-width: 320px) {
     h1 {
-        font-size: 4dvh;
+        font-size: 4vh;
     }
     
     .input-char {
-        width: 14dvw;
-        height: 14dvw;
-        font-size: 9dvw;
-        border-width: 1dvw;
+        width: 14vw;
+        height: 14vw;
+        font-size: 9vw;
+        border-width: 1vw;
     }
     
     main {
-        gap: 1.5dvw;
+        gap: 1.5vw;
     }
     
     .popup {
@@ -410,8 +436,8 @@ main {
     }
     
     .pontos {
-        width: 4dvw;
-        height: 8dvh;
+        width: 4vw;
+        height: 8vh;
         font-size: medium;
     }
 }
@@ -419,32 +445,32 @@ main {
 /* Orientação landscape para smartphones */
 @media screen and (max-height: 500px) and (orientation: landscape) {
     header {
-        margin-top: 3dvh;
+        margin-top: 3vh;
     }
     
     h1 {
-        font-size: 4dvh;
+        font-size: 4vh;
     }
     
     main {
-        margin-top: 3dvh;
-        height: 8dvw;
+        margin-top: 3vh;
+        height: 8vw;
     }
     
     .input-char {
-        width: 6dvw;
-        height: 6dvw;
-        font-size: 4dvw;
+        width: 6vw;
+        height: 6vw;
+        font-size: 4vw;
     }
     
     #countdown {
-        bottom: 5dvh;
+        bottom: 5vh;
         font-size: medium;
         padding: 10px;
     }
     
     .pontos {
-        height: 10dvh;
+        height: 10vh;
     }
     
     .popup {
@@ -454,10 +480,4 @@ main {
     #regras-do-jogo {
         max-height: 85vh;
     }
-}
-
-#select-lang {
-    position: fixed;
-    right: 15px;
-    top: 15px;
 }
