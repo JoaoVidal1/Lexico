@@ -16,12 +16,24 @@
     --bg-color: #ffffff;
     --fg-color: #000000;
     --popup-bg: #ffffffe8;
+    .light-only{
+        display: flex;
+    }
+    .dark-only{
+        display: none;
+    }
 }
 
 [data-theme="dark"] {
     --bg-color: #080808;
     --fg-color: #ffffff;
     --popup-bg: #000000d8;
+    .light-only{
+        display: none;
+    }
+    .dark-only{
+        display: flex;
+    }
 }
 
 * {
@@ -77,7 +89,7 @@ nav {
     flex-direction: row;
     justify-content: flex-end;
     align-items: center;
-    gap: 20px;
+    gap: 50px;
     flex-wrap: wrap;
 }
 
@@ -92,69 +104,6 @@ nav {
 .nav-item label {
     white-space: nowrap;
     font-size: 0.9rem;
-}
-
-.switch {
-  position: relative;
-  display: inline-block;
-  width: 60px;
-  height: 34px;
-}
-
-/* Hide default HTML checkbox */
-.switch input {
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-
-/* The slider */
-.slider {
-  position: absolute;
-  cursor: pointer;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: #ccc;
-  -webkit-transition: .4s;
-  transition: .4s;
-  border: 2px solid var(--red);
-}
-
-.slider:before {
-  position: absolute;
-  content: "";
-  height: 26px;
-  width: 26px;
-  left: 4px;
-  bottom: 2px;
-  background-color: var(--bg-color);
-  -webkit-transition: .4s;
-  transition: .4s;
-}
-
-input:checked + .slider {
-  background-color: var(--red);
-}
-
-input:focus + .slider {
-  box-shadow: 0 0 1px var(--red);
-}
-
-input:checked + .slider:before {
-  -webkit-transform: translateX(24px);
-  -ms-transform: translateX(24px);
-  transform: translateX(24px);
-}
-
-/* Rounded sliders */
-.slider.round {
-  border-radius: 34px;
-}
-
-.slider.round:before {
-  border-radius: 50%;
 }
 
 #select-lang {
@@ -380,7 +329,7 @@ input[type=number] {
     main {
         margin-top: 50dvh;
         width: 95dvw;
-        height: auto; /* Mudado para auto para permitir duas linhas */
+        height: auto;
         flex-wrap: wrap;
         justify-content: center;
         gap: 1.5dvw;
@@ -396,12 +345,6 @@ input[type=number] {
         padding: 20px;
     }
     
-    .label-home {
-        margin-bottom: 4dvh;
-        text-align: center;
-        padding: 0 20px;
-    }
-    
     #input-tempo {
         font-size: medium;
         padding: 15px;
@@ -411,11 +354,6 @@ input[type=number] {
         margin-top: 4dvh;
         padding: 15px 25px;
         font-size: large;
-    }
-    
-    #btn-ajuda {
-        margin-top: 2dvh;
-        font-size: medium;
     }
     
     #countdown {
@@ -448,22 +386,6 @@ input[type=number] {
         font-size: 0.8rem;
     }
     
-    .switch {
-        width: 50px;
-        height: 28px;
-    }
-    
-    .slider:before {
-        height: 22px;
-        width: 22px;
-        left: 3px;
-        bottom: 1px;
-    }
-    
-    input:checked + .slider:before {
-        transform: translateX(20px);
-    }
-    
     #select-lang {
         padding: 6px 8px;
         font-size: 0.8rem;
@@ -481,17 +403,17 @@ input[type=number] {
     }
     
     .input-char {
-        width: 15dvw; /* Aumentado para caber 4 por linha */
+        width: 15dvw;
         height: 15dvw;
         font-size: 12dvw;
         border-width: 0.8dvw;
-        margin: 1dvw; /* Margem para espaçamento */
+        margin: 1dvw;
     }
     
     main {
         margin-top: 30dvh;
         width: 98dvw;
-        height: auto; /* Auto height para permitir duas linhas */
+        height: auto;
         flex-wrap: wrap;
         justify-content: center;
         gap: 1dvw;
@@ -508,36 +430,6 @@ input[type=number] {
         padding: 15px;
     }
     
-    #regras-do-jogo {
-        padding: 20px;
-        max-width: 90dvw;
-        max-height: 80dvh;
-        overflow-y: auto;
-    }
-    
-    #regras-do-jogo h2 {
-        font-size: x-large;
-        margin-bottom: 15px;
-    }
-    
-    #regras-do-jogo h3 {
-        font-size: large;
-        margin: 15px 0 10px 0;
-    }
-    
-    #regras-do-jogo p, 
-    #regras-do-jogo li {
-        font-size: medium;
-        line-height: 1.4;
-    }
-    
-    .label-home {
-        margin-bottom: 3dvh;
-        font-size: medium;
-        text-align: center;
-        padding: 0 15px;
-    }
-    
     #input-tempo {
         font-size: medium;
         padding: 12px;
@@ -548,12 +440,6 @@ input[type=number] {
         margin-top: 3dvh;
         padding: 12px 20px;
         font-size: medium;
-    }
-    
-    #btn-ajuda {
-        margin-top: 2dvh;
-        font-size: small;
-        padding: 8px 15px;
     }
     
     #countdown {
@@ -610,22 +496,6 @@ input[type=number] {
         margin-bottom: 2px;
     }
     
-    .switch {
-        width: 45px;
-        height: 26px;
-    }
-    
-    .slider:before {
-        height: 20px;
-        width: 20px;
-        left: 2px;
-        bottom: 1px;
-    }
-    
-    input:checked + .slider:before {
-        transform: translateX(18px);
-    }
-    
     #select-lang {
         padding: 5px 6px;
         font-size: 0.7rem;
@@ -640,7 +510,7 @@ input[type=number] {
     }
     
     .input-char {
-        width: 18dvw; /* Ajustado para telas muito pequenas */
+        width: 18dvw;
         height: 18dvw;
         font-size: 10dvw;
         border-width: 1dvw;
@@ -661,10 +531,6 @@ input[type=number] {
         padding: 10px;
     }
     
-    .label-home {
-        font-size: small;
-    }
-    
     #input-tempo {
         font-size: small;
         padding: 10px;
@@ -674,11 +540,6 @@ input[type=number] {
     #jogar {
         padding: 10px 15px;
         font-size: small;
-    }
-    
-    #btn-ajuda {
-        font-size: x-small;
-        padding: 6px 12px;
     }
     
     #countdown {
@@ -709,22 +570,6 @@ input[type=number] {
         font-size: 0.6rem;
     }
     
-    .switch {
-        width: 40px;
-        height: 24px;
-    }
-    
-    .slider:before {
-        height: 18px;
-        width: 18px;
-        left: 2px;
-        bottom: 1px;
-    }
-    
-    input:checked + .slider:before {
-        transform: translateX(16px);
-    }
-    
     #select-lang {
         font-size: 0.6rem;
         padding: 4px 5px;
@@ -744,13 +589,13 @@ input[type=number] {
     
     main {
         margin-top: 3dvh;
-        height: auto; /* Auto para permitir duas linhas */
+        height: auto;
         flex-wrap: wrap;
         justify-content: center;
     }
     
     .input-char {
-        width: 8dvw; /* Ajustado para landscape */
+        width: 8dvw;
         height: 8dvw;
         font-size: 5dvw;
         margin: 0.5dvw;
@@ -773,10 +618,6 @@ input[type=number] {
     
     .popup {
         font-size: medium;
-    }
-    
-    #regras-do-jogo {
-        max-height: 85dvh;
     }
 
     nav {

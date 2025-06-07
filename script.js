@@ -451,8 +451,6 @@ function mudarTema() {
     }
 }
 
-document.getElementById("theme-toggle").addEventListener('change', mudarTema);
-
 document.addEventListener("DOMContentLoaded", () => {
     let temaSalvo = localStorage.getItem("theme");
     if (temaSalvo) {
