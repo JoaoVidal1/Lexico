@@ -167,19 +167,20 @@ async function verificarPalavra() {
                 }
             case "en":
                 try {
-                    const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${GAMESTATE.currentWord}`);
-                    if (res.ok) {
-                      const data = await res.json();
-                      return true; // Palavra existe
-                    } else if (res.status === 404) {
-                      return false; // Palavra não existe
+                    const response = await fetch(`https://api.datamuse.com/words?sp=${encodeURIComponent(GAMESTATE.currentWord)}&max=1`);
+                    const data = await response.json();
+
+                    if (data.length > 0 && data[0].word.toLowerCase() === GAMESTATE.currentWord.toLowerCase()) {
+                    console.log(`The word "${GAMESTATE.currentWord}" exists in Datamuse.`);
+                    return true;
                     } else {
-                      throw new Error('Erro inesperado');
-                    }
-                  } catch (err) {
-                    console.error(err);
+                    console.log(`The word "${GAMESTATE.currentWord}" does NOT exist in Datamuse.`);
                     return false;
-                  }
+                    }
+                } catch (error) {
+                    console.error('Error checking word:', error);
+                    return false;
+                }
             default:
                 break;
         }
@@ -289,7 +290,7 @@ async function vitoriaRound(caso, vencedor) {
                 document.getElementById("link-sentido").style.color = vencedor === "red" ? CONFIG.colors.red : CONFIG.colors.blue;
                 break;
             case 2:
-                DOM.victoryDetails.innerHTML += `O jogador ${vencedor === "red" ? "azul" : "vermelho"} digitou a palavra <br><a id="link-sentido" target="_blank" rel=”noopener noreferrer” href="${CONFIG.lang === "pt" ? `https://www.dicio.com.br/${GAMESTATE.currentWord}` : `https://dictionary.cambridge.org/dictionary/english/${GAMESTATE.currentWord}`}">${GAMESTATE.currentWord}</a>`;
+                DOM.victoryDetails.innerHTML += `O jogador ${vencedor === "red" ? "azul" : "vermelho"} digitou a palavra <br><a id="link-sentido" target="_blank" rel=”noopener noreferrer” href="${CONFIG.lang === "pt" ? `https://www.dicio.com.br/${GAMESTATE.currentWord}` : `https://dictionary.cambridge.org/dictionary/english/${GAMESTATE.currentWord}`}">"${GAMESTATE.currentWord}"</a>`;
                 document.getElementById("link-sentido").style.color = vencedor === "red" ? CONFIG.colors.red : CONFIG.colors.blue;
                 break;
             case 3:
