@@ -332,6 +332,7 @@ function vitoriaJogo() {
     GAMESTATE.points.red = 0;
     GAMESTATE.points.blue = 0;
     GAMESTATE.newGame = true;
+    DOM.startForm.style.display = 'flex';
 }
 
 function startTurnTimer() {
@@ -422,7 +423,7 @@ console.log(gerarVariacoes("acao"));
 
 
 // Função que atualiza o atributo lang da página
-function atualizarLangPagina() {
+function resetGame() {
     const select = document.getElementById('select-lang');
     const langSelecionado = select.value;
     
@@ -438,7 +439,10 @@ function atualizarLangPagina() {
 }
 
 // Adiciona o event listener para mudança no select
-document.getElementById('select-lang').addEventListener('change', atualizarLangPagina);
+document.getElementById('select-lang').addEventListener('change', resetGame);
+
+document.getElementById('title').addEventListener('click', resetGame);
+
 
 function mudarTema() {
     let tema = document.documentElement.getAttribute("data-theme");

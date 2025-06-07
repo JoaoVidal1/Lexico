@@ -70,6 +70,11 @@ h1 {
     font-size: 4dvh;
     letter-spacing: 10px;
     margin: 0px;
+    transition: text-shadow var(--transition-speed);
+}
+
+h1:hover {
+    text-shadow: 0px 0px 15px var(--fg-color);
 }
 
 /* Correções para a navbar */
@@ -139,7 +144,6 @@ nav {
 
 .input-char:disabled {
     filter: opacity(0.7);
-    cursor: not-allowed;
 }
 
 main {
