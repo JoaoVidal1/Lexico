@@ -151,14 +151,16 @@ async function verificarPalavra() {
         switch (CONFIG.lang) {
             case "pt":
                 try {
-                    const resposta = await fetch(`https://api.dicionario-aberto.net/near/${GAMESTATE.currentWord}`);
-                    const dados = await resposta.json();
-                    const palavrasValidas = dados
-                        .filter(e => e.length === GAMESTATE.currentWord.length)
-                        .map(element => element.replace(CONFIG.charNotAllowed, match => caracteresUnicos[match.toLowerCase()] || match))
-                        .filter(e => e === GAMESTATE.currentWord);
-                    console.log(palavrasValidas);
-                    return palavrasValidas.length > 0;
+                    const variacoes = await gerarVariacoes(GAMESTATE.currentWord);
+                    console.log(variacoes)
+                    for (let word of variacoes) {
+                        const resposta = await fetch(`https://api.dicionario-aberto.net/word/${word}`);
+                        const dados = await resposta.json();
+                        if (dados.length > 0) {
+                            return true; // É um prefixo válido
+                        }
+                    }
+                    return false; // Não é um prefixo válido
                 } catch (error) {
                     console.error(error);
                     return false;
@@ -361,46 +363,60 @@ function updateCountdownDisplay() {
 }
 
 const caracteresUnicos = {
-    "á" : "a",
-    "â" : "a",
-    "é" : "e",
-    "ê" : "e",
-    "í" : "i",
-    "ó" : "o",
-    "ô" : "o",
-    "ú" : "u",
-    "ç" : "c"
-}
+  "á": "a",
+  "â": "a",
+  "é": "e",
+  "ê": "e",
+  "í": "i",
+  "ó": "o",
+  "ô": "o",
+  "ú": "u",
+  "ç": "c"
+};
 
 function gerarVariacoes(palavra) {
-    const mapeamento = {
-      a: ['a', 'á', 'â', 'ã'],
-      e: ['e', 'é', 'ê'],
-      i: ['i', 'í'],
-      o: ['o', 'ó', 'ô', 'õ'],
-      u: ['u', 'ú', 'ü'],
-      c: ['c', 'ç']
-    };
-  
-    function combinar(subPalavra, indice, acentoUsado) {
-      if (indice === palavra.length) {
-        return [subPalavra];
-      }
-  
-      const char = palavra[indice];
-      const alternativas = mapeamento[char] || [char];
-  
-      return alternativas.flatMap(letra => {
-        const isAcentuada = mapeamento[char]?.includes(letra) && letra !== char;
-        if (acentoUsado && isAcentuada) {
-          return [];
-        }
-        return combinar(subPalavra + letra, indice + 1, acentoUsado || isAcentuada);
-      });
+  const mapeamento = {
+    a: ['a', 'á', 'â', 'ã'],
+    e: ['e', 'é', 'ê'],
+    i: ['i', 'í'],
+    o: ['o', 'ó', 'ô', 'õ'],
+    u: ['u', 'ú'],
+    c: ['c', 'ç']
+  };
+
+  // Conjunto com os caracteres considerados como acento agudo ou circunflexo.
+  const acentoSet = new Set(['á','â','é','ê','í','ó','ô','ú']);
+
+  // Função recursiva que monta as variações; "acentoUsado" indica se já foi usado um dos acentos restritos.
+  function combinar(subPalavra, indice, acentoUsado) {
+    if (indice === palavra.length) {
+      return [subPalavra];
     }
-  
-    return combinar('', 0, false);
+
+    const char = palavra[indice];
+    const alternativas = mapeamento[char] || [char];
+
+    return alternativas.flatMap(letra => {
+      const isAcento = acentoSet.has(letra);
+      // Se já teve um acento agudo/circunflexo e a alternativa atual também for desse tipo,
+      // não a permitimos.
+      if (acentoUsado && isAcento) {
+        return [];
+      }
+      return combinar(subPalavra + letra, indice + 1, acentoUsado || isAcento);
+    });
+  }
+
+  return combinar('', 0, false);
 }
+
+// Exemplo de uso:
+console.log(gerarVariacoes("acao"));
+
+
+// Exemplo de uso:
+console.log(gerarVariacoes("acao")); 
+
 
 // Função que atualiza o atributo lang da página
 function atualizarLangPagina() {
