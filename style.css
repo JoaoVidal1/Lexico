@@ -24,7 +24,7 @@
 }
 
 body {
-    height: 100vh;
+    height: 100dvh;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -32,12 +32,12 @@ body {
 }
 
 header {
-    margin-top: 10vh;
+    margin-top: 10dvh;
     z-index: 10;
 }
 
 h1 {
-    font-size: 8vh;
+    font-size: 8dvh;
     text-shadow: 0px 0px 3px var(--fg-color);
     letter-spacing: 10px;
 }
@@ -52,28 +52,28 @@ h1 {
 }
 
 #select-lang:hover {
-    box-shadow: 0px 0px 1vw white;
+    box-shadow: 0px 0px 1dvw white;
     border-color: white;
     cursor: pointer;
 }
 
 .input-char {
     background-color: #080808;
-    border: 0.4vw solid var(--fg-color);
+    border: 0.4dvw solid var(--fg-color);
     border-radius: 25%;
     caret-color: transparent;
-    width: 7vw;
-    height: 7vw;
+    width: 7dvw;
+    height: 7dvw;
     text-align: center;
-    font-size: 5vw;
+    font-size: 5dvw;
     text-transform: uppercase;
 }
 
 main {
     display: flex;
-    margin-top: 10vh;
-    width: 80vw;
-    height: 10vw;
+    margin-top: 10dvh;
+    width: 80dvw;
+    height: 10dvw;
     justify-content: space-around;
     align-items: center;
 }
@@ -85,8 +85,8 @@ main {
     font-size: xx-large;
     position: fixed;
     font-weight: 400;
-    width: 100vw;
-    height: 100vh;
+    width: 100dvw;
+    height: 100dvh;
     top: 0;
     left: 0;
     background-color: #000000d8;
@@ -119,8 +119,8 @@ main {
     position: fixed;
     font-weight: 400;
     bottom: 0px;
-    width: 1vw;
-    height: 5vh;
+    width: 1dvw;
+    height: 5dvh;
 }
 
 #pontos-red {
@@ -136,8 +136,8 @@ main {
 #countdown {
     font-size: xx-large;
     position: fixed;
-    bottom: 15vh;
-    border: 2px solid transparent;
+    bottom: 15dvh;
+    border: 3px solid transparent;
     border-radius: 20px;
     padding: 30px;
 }
@@ -150,8 +150,8 @@ main {
 }
 
 .label-home {
-    margin-bottom: 5vh;
-    inline-size: 70vw;
+    margin-bottom: 5dvh;
+    inline-size: 70dvw;
     overflow-wrap: break-word;
     text-align: center;
 }
@@ -166,7 +166,7 @@ main {
 
 #input-tempo:hover {
     cursor: pointer;
-    box-shadow: 0px 0px 1vw white;
+    box-shadow: 0px 0px 1dvw white;
 }
 
 :is(select, input):open {
@@ -174,7 +174,7 @@ main {
 }
 
 #jogar {
-    margin-top: 5vh;
+    margin-top: 5dvh;
     background-color: black;
     border: 2px solid var(--red);
     padding: 20px;
@@ -184,11 +184,11 @@ main {
 #jogar:hover {
     cursor: pointer;
     background-color: var(--red);
-    box-shadow: 0px 0px 1vw var(--red);
+    box-shadow: 0px 0px 1dvw var(--red);
 }
 
 #btn-ajuda {
-    margin-top: 3vh;
+    margin-top: 3dvh;
 }
 
 #btn-ajuda:hover {
@@ -200,23 +200,23 @@ main {
 /* Tablets em landscape e desktops pequenos */
 @media screen and (max-width: 1024px) {
     h1 {
-        font-size: 7vh;
+        font-size: 7dvh;
     }
     
     .input-char {
-        width: 8vw;
-        height: 8vw;
-        font-size: 5.5vw;
-        border-width: 0.5vw;
+        width: 8dvw;
+        height: 8dvw;
+        font-size: 5.5dvw;
+        border-width: 0.5dvw;
     }
     
     main {
-        width: 90vw;
+        width: 90dvw;
     }
     
     #countdown {
         font-size: x-large;
-        bottom: 12vh;
+        bottom: 12dvh;
         padding: 25px;
     }
 }
@@ -224,24 +224,32 @@ main {
 /* Tablets em portrait */
 @media screen and (max-width: 768px) {
     header {
-        margin-top: 8vh;
+        margin-top: 8dvh;
     }
     
     h1 {
-        font-size: 6vh;
+        font-size: 6dvh;
     }
     
     .input-char {
-        width: 10vw;
-        height: 10vw;
-        font-size: 7vw;
-        border-width: 0.6vw;
+        width: 8dvw;
+        height: 8dvw;
+        font-size: 7dvw;
+        border-width: 0.6dvw;
     }
     
     main {
-        margin-top: 8vh;
-        width: 95vw;
-        height: 12vw;
+        margin-top: 8dvh;
+        width: 95dvw;
+        height: auto; /* Mudado para auto para permitir duas linhas */
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 1.5dvw;
+    }
+    
+    /* Força quebra de linha após o 4º input */
+    .input-char:nth-child(4) {
+        margin-right: 100%;
     }
     
     .popup {
@@ -250,7 +258,7 @@ main {
     }
     
     .label-home {
-        margin-bottom: 4vh;
+        margin-bottom: 4dvh;
         text-align: center;
         padding: 0 20px;
     }
@@ -261,25 +269,25 @@ main {
     }
     
     #jogar {
-        margin-top: 4vh;
+        margin-top: 4dvh;
         padding: 15px 25px;
         font-size: large;
     }
     
     #btn-ajuda {
-        margin-top: 2vh;
+        margin-top: 2dvh;
         font-size: medium;
     }
     
     #countdown {
-        bottom: 10vh;
+        bottom: 10dvh;
         font-size: large;
         padding: 20px;
     }
     
     .pontos {
-        width: 2vw;
-        height: 6vh;
+        width: 2dvw;
+        height: 6dvh;
         font-size: x-large;
     }
 }
@@ -287,26 +295,34 @@ main {
 /* Smartphones */
 @media screen and (max-width: 480px) {
     header {
-        margin-top: 6vh;
+        margin-top: 6dvh;
     }
     
     h1 {
-        font-size: 5vh;
+        font-size: 5dvh;
     }
     
     .input-char {
-        width: 12vw;
-        height: 12vw;
-        font-size: 8vw;
-        border-width: 0.8vw;
+        width: 15dvw; /* Aumentado para caber 4 por linha */
+        height: 15dvw;
+        font-size: 12dvw;
+        border-width: 0.8dvw;
+        margin: 1dvw; /* Margem para espaçamento */
     }
     
     main {
-        margin-top: 6vh;
-        width: 98vw;
-        height: 15vw;
+        margin-top: 6dvh;
+        width: 98dvw;
+        height: auto; /* Auto height para permitir duas linhas */
         flex-wrap: wrap;
-        gap: 2vw;
+        justify-content: center;
+        gap: 1dvw;
+        align-content: center;
+    }
+    
+    /* Força quebra de linha após o 4º input */
+    .input-char:nth-child(4) {
+        margin-right: 100%;
     }
     
     .popup {
@@ -316,8 +332,8 @@ main {
     
     #regras-do-jogo {
         padding: 20px;
-        max-width: 90vw;
-        max-height: 80vh;
+        max-width: 90dvw;
+        max-height: 80dvh;
         overflow-y: auto;
     }
     
@@ -338,7 +354,7 @@ main {
     }
     
     .label-home {
-        margin-bottom: 3vh;
+        margin-bottom: 3dvh;
         font-size: medium;
         text-align: center;
         padding: 0 15px;
@@ -351,26 +367,26 @@ main {
     }
     
     #jogar {
-        margin-top: 3vh;
+        margin-top: 3dvh;
         padding: 12px 20px;
         font-size: medium;
     }
     
     #btn-ajuda {
-        margin-top: 2vh;
+        margin-top: 2dvh;
         font-size: small;
         padding: 8px 15px;
     }
     
     #countdown {
-        bottom: 8vh;
+        bottom: 8dvh;
         font-size: medium;
         padding: 15px;
     }
     
     .pontos {
-        width: 3vw;
-        height: 7vh;
+        width: 3dvw;
+        height: 7dvh;
         font-size: large;
     }
     
@@ -391,18 +407,24 @@ main {
 /* Smartphones muito pequenos */
 @media screen and (max-width: 320px) {
     h1 {
-        font-size: 4vh;
+        font-size: 4dvh;
     }
     
     .input-char {
-        width: 14vw;
-        height: 14vw;
-        font-size: 9vw;
-        border-width: 1vw;
+        width: 18dvw; /* Ajustado para telas muito pequenas */
+        height: 18dvw;
+        font-size: 10dvw;
+        border-width: 1dvw;
+        margin: 0.5dvw;
     }
     
     main {
-        gap: 1.5vw;
+        gap: 0.5dvw;
+    }
+    
+    /* Força quebra de linha após o 4º input */
+    .input-char:nth-child(4) {
+        margin-right: 100%;
     }
     
     .popup {
@@ -436,8 +458,8 @@ main {
     }
     
     .pontos {
-        width: 4vw;
-        height: 8vh;
+        width: 4dvw;
+        height: 8dvh;
         font-size: medium;
     }
 }
@@ -445,32 +467,40 @@ main {
 /* Orientação landscape para smartphones */
 @media screen and (max-height: 500px) and (orientation: landscape) {
     header {
-        margin-top: 3vh;
+        margin-top: 3dvh;
     }
     
     h1 {
-        font-size: 4vh;
+        font-size: 4dvh;
     }
     
     main {
-        margin-top: 3vh;
-        height: 8vw;
+        margin-top: 3dvh;
+        height: auto; /* Auto para permitir duas linhas */
+        flex-wrap: wrap;
+        justify-content: center;
     }
     
     .input-char {
-        width: 6vw;
-        height: 6vw;
-        font-size: 4vw;
+        width: 8dvw; /* Ajustado para landscape */
+        height: 8dvw;
+        font-size: 5dvw;
+        margin: 0.5dvw;
+    }
+    
+    /* Força quebra de linha após o 4º input em landscape */
+    .input-char:nth-child(4) {
+        margin-right: 100%;
     }
     
     #countdown {
-        bottom: 5vh;
+        bottom: 5dvh;
         font-size: medium;
         padding: 10px;
     }
     
     .pontos {
-        height: 10vh;
+        height: 10dvh;
     }
     
     .popup {
@@ -478,6 +508,6 @@ main {
     }
     
     #regras-do-jogo {
-        max-height: 85vh;
+        max-height: 85dvh;
     }
 }
