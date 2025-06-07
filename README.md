@@ -1,4 +1,4 @@
-# LÉXICO
+# LEXICON
 
 Este projeto foi desenvolvido como um jogo simples e divertido, onde dois jogadores competem para levar o adversário a cometer um erro. A competição consiste em tentar fazer com que o oponente digite uma palavra ou escreva um prefixo inválido (ou seja, uma sequência que **não seja** o início de uma palavra válida).
 
