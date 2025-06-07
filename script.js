@@ -261,7 +261,7 @@ async function vitoriaRound(caso, vencedor) {
     
     if (caso === 0) {
         // Empate
-        DOM.victoryDetails.innerHTML = `Houve um empate<br><span style="color:${GAMESTATE.currentPlayer === "red" ? CONFIG.colors.red : CONFIG.colors.blue}">'${GAMESTATE.currentWord}'</span> não é uma palavra, mas é possível prosseguir a partir dela<br><a id="link-sentido" href="https://www.dicio.com.br/pesquisa.php?q=${GAMESTATE.currentWord}">Palavras possíveis</a>`;
+        DOM.victoryDetails.innerHTML = `Houve um empate<br><span style="color:${GAMESTATE.currentPlayer === "red" ? CONFIG.colors.red : CONFIG.colors.blue}">'${GAMESTATE.currentWord}'</span> não é uma palavra, mas é possível prosseguir a partir dela<br><a id="link-sentido" target="_blank" rel=”noopener noreferrer” href="https://www.dicio.com.br/pesquisa.php?q=${GAMESTATE.currentWord}">Palavras possíveis</a>`;
         document.getElementById("link-sentido").style.color = "#00ffbf";
     } else {
         // Alguém ganhou
@@ -285,15 +285,15 @@ async function vitoriaRound(caso, vencedor) {
         switch (caso) {
             case 1:
                 let previous = GAMESTATE.currentWord.split("").toSpliced(-1).join("");
-                DOM.victoryDetails.innerHTML += `Não é possível continuar a partir de "${GAMESTATE.currentWord}" <br><a id="link-sentido" href="${CONFIG.lang === "pt" ? `https://www.dicio.com.br/palavras-comecam-${previous}` : `https://www.merriam-webster.com/wordfinder/classic/begins/all/-1/${previous}/1`}">Palavras que começam por "${previous}"</a>`;
+                DOM.victoryDetails.innerHTML += `Não é possível continuar a partir de "${GAMESTATE.currentWord}" <br><a id="link-sentido" target="_blank" rel=”noopener noreferrer” href="${CONFIG.lang === "pt" ? `https://www.dicio.com.br/palavras-comecam-${previous}` : `https://www.merriam-webster.com/wordfinder/classic/begins/all/-1/${previous}/1`}">Palavras que começam por "${previous}"</a>`;
                 document.getElementById("link-sentido").style.color = vencedor === "red" ? CONFIG.colors.red : CONFIG.colors.blue;
                 break;
             case 2:
-                DOM.victoryDetails.innerHTML += `O jogador ${vencedor === "red" ? "azul" : "vermelho"} digitou a palavra <br><a id="link-sentido" href="${CONFIG.lang === "pt" ? `https://www.dicio.com.br/${GAMESTATE.currentWord}` : `https://dictionary.cambridge.org/dictionary/english/${GAMESTATE.currentWord}`}">${GAMESTATE.currentWord}</a>`;
+                DOM.victoryDetails.innerHTML += `O jogador ${vencedor === "red" ? "azul" : "vermelho"} digitou a palavra <br><a id="link-sentido" target="_blank" rel=”noopener noreferrer” href="${CONFIG.lang === "pt" ? `https://www.dicio.com.br/${GAMESTATE.currentWord}` : `https://dictionary.cambridge.org/dictionary/english/${GAMESTATE.currentWord}`}">${GAMESTATE.currentWord}</a>`;
                 document.getElementById("link-sentido").style.color = vencedor === "red" ? CONFIG.colors.red : CONFIG.colors.blue;
                 break;
             case 3:
-                DOM.victoryDetails.innerHTML += `O jogador anterior demorou demais<br><a id="link-sentido" href="${CONFIG.lang === "pt" ? `https://www.dicio.com.br/palavras-comecam-${GAMESTATE.currentWord}` : `https://www.merriam-webster.com/wordfinder/classic/begins/all/-1/${GAMESTATE.currentWord}/1`}">Palavras que começam por "${GAMESTATE.currentWord}"</a>`;
+                DOM.victoryDetails.innerHTML += `O jogador anterior demorou demais<br><a id="link-sentido" target="_blank" rel=”noopener noreferrer” href="${CONFIG.lang === "pt" ? `https://www.dicio.com.br/palavras-comecam-${GAMESTATE.currentWord}` : `https://www.merriam-webster.com/wordfinder/classic/begins/all/-1/${GAMESTATE.currentWord}/1`}">Palavras que começam por "${GAMESTATE.currentWord}"</a>`;
                 document.getElementById("link-sentido").style.color = vencedor === "red" ? CONFIG.colors.red : CONFIG.colors.blue;
                 break;
         }
@@ -425,6 +425,7 @@ function atualizarLangPagina() {
     const select = document.getElementById('select-lang');
     const langSelecionado = select.value;
     
+    DOM.countdown.style.display = 'none';
     document.documentElement.setAttribute('lang', langSelecionado);
     CONFIG.lang = langSelecionado;
     GAMESTATE.currentPlayer = "red";
@@ -451,3 +452,10 @@ function mudarTema() {
 }
 
 document.getElementById("theme-toggle").addEventListener('change', mudarTema);
+
+document.addEventListener("DOMContentLoaded", () => {
+    let temaSalvo = localStorage.getItem("theme");
+    if (temaSalvo) {
+        html.setAttribute("data-theme", temaSalvo);
+    }
+});
