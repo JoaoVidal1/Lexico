@@ -75,7 +75,6 @@ h1 {
 
 h1:hover {
     color: var(--blue);
-    text-shadow: 0px 0px 3px var(--blue);
     cursor: pointer;
 }
 
