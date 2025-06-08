@@ -1,3 +1,15 @@
+const GAMESTATE = {
+    currentPlayer: 'red',
+    currentWord: '',
+    boxIndex: 1,
+    points: { red: 0, blue: 0},
+    timer: null,
+    countdown: null,
+    endTime: null,
+    newGame: false,
+    continueTurn: true
+};
+
 const CONFIG = {
     colors: {
         red : "#ff2b47",
@@ -9,54 +21,20 @@ const CONFIG = {
     maxPoints: 15,
     maxTime: 15,
     lang: document.getElementById('select-lang').value,
-    iniciosInvalidos: {
-        pt:  [
-            "aa", "ak", "aw", "ay",
-            "bb", "bc", "bd", "bf", "bg", "bh", "bj", "bk", "bm", "bn", "bp", "bq", "bs", "bt", "bv", "bw", "bx", "by", "bz",
-            "cb", "cc", "cd", "cf", "cg", "cj", "ck", "cm", "cn", "cp", "cq", "cs", "cv", "cw", "cx", "cy", "cz",
-            "db", "dc", "dd", "df", "dg", "dh", "dj", "dk", "dl", "dm", "dn", "dp", "dq", "ds", "dt", "dv", "dw", "dx", "dy", "dz",
-            "ee", "ej", "ek", "eh", "eo", "ew", "ey",
-            "fb", "fc", "fd", "ff", "fg", "fh", "fj", "fk", "fm", "fn", "fp", "fq", "fs", "ft", "fv", "fw", "fx", "fy", "fz",
-            "gb", "gc", "gd", "gf", "gg", "gh", "gj", "gk", "gm", "gp", "gq", "gs", "gt", "gv", "gw", "gx", "gy", "gz",
-            "hb", "hc", "hd", "hf", "hg", "hh", "hj", "hk", "hl", "hm", "hn", "hp", "hq", "hr", "hs", "ht", "hv", "hw", "hx", "hy", "hz",
-            "ih", "ii", "ij", "ik", "iq", "iw", "iy",
-            "jb", "jc", "jd", "jf", "jg", "jh", "jj", "jk", "jl", "jm", "jn", "jp", "jq", "jr", "js", "jt", "jv", "jw", "jx", "jy", "jz",
-            "ka", "kb", "kc", "kd", "kf", "kg", "kj", "kk", "km", "kn", "kp", "kq", "kt", "kv", "kx", "kz",
-            "lb", "lc", "ld", "lf", "lg", "lj", "lk", "ll", "lm", "ln", "lp", "lq", "lr", "ls", "lt", "lv", "lw", "lx", "ly", "lz",
-            "mb", "mc", "md", "mf", "mg", "mh", "mj", "mk", "ml", "mm", "mn", "mp", "mq", "mr", "ms", "mt", "mv", "mw", "mx", "my", "mz",
-            "nb", "nc", "nd", "nf", "ng", "nj", "nk", "nl", "nm", "nn", "np", "nq", "nr", "ns", "nt", "nv", "nw", "nx", "ny", "nz",
-            "oa", "oe", "oj", "ok", "oo", "oq", "ow", "oy",
-            "pb", "pc", "pd", "pf", "pg", "pj", "pk", "pm", "pn", "pp", "pq", "pt", "pv", "pw", "px", "py", "pz",
-            "qa", "qb", "qc", "qd", "qe", "qf", "qg", "qh", "qi", "qj", "qk", "ql", "qm", "qn", "qo", "qq", "qr", "qs", "qt", "qv", "qw", "qx", "qy", "qz",
-            "rb", "rc", "rd", "rf", "rg", "rh", "rj", "rk", "rl", "rm", "rn", "rp", "rq", "rr", "rs", "rt", "rv", "rw", "rx", "ry", "rz",
-            "sb", "sd", "sf", "sg", "sh", "sj", "sq", "sr", "ss", "sv", "sw", "sx", "sy", "sz",
-            "tb", "tc", "td", "tf", "tg", "th", "tj", "tk", "tl", "tm", "tn", "tp", "tq", "tt", "tv", "tw", "ty", "tz",
-            "uh", "uj", "uk", "uo", "up", "uq", "uu", "uv", "uw", "ux", "uy",
-            "vb", "vc", "vd", "vf", "vg", "vh", "vj", "vk", "vl", "vm", "vn", "vp", "vq", "vr", "vs", "vt", "vv", "vw", "vx", "vy", "vz",
-            "w",
-            "xb", "xc", "xd", "xf", "xg", "xh", "xj", "xk", "xl", "xm", "xn", "xp", "xq", "xr", "xs", "xt", "xv", "xw", "xx", "xy", "xz",
-            "y",
-            "zb", "zc", "zd", "zf", "zg", "zh", "zj", "zk", "zl", "zm", "zn", "zp", "zq", "zr", "zs", "zt", "zv", "zw", "zx", "zy", "zz"
-        ],
-        en: [
-            "qh", "qj", "qk", "qv", "qx", "qz",
-            "vm", "vj", "vk", "vq", "vx", "vz",
-            "xh", "xj", "xq", "xv", "xz",
-            "zf", "zj", "zk", "zq", "zx"
-        ]
+    dicio: {
+        pt: {},
+        en: {}
+    },
+    links: {
+        palavra: {
+            pt: `https://www.dicio.com.br/`,
+            en: `https://dictionary.cambridge.org/dictionary/english/`
+        },
+        prefixo: {
+            pt: `https://www.dicio.com.br/palavras-comecam-`,
+            en: `https://www.merriam-webster.com/wordfinder/classic/begins/all/-1/`
+        }
     }
-};
-
-const GAMESTATE = {
-    currentPlayer: 'red',
-    currentWord: '',
-    boxIndex: 1,
-    points: { red: 0, blue: 0},
-    timer: null,
-    countdown: null,
-    endTime: null,
-    newGame: false,
-    continueTurn: true
 };
 
 const DOM = {
@@ -110,7 +88,7 @@ function novaLetra(box) {
     GAMESTATE.boxIndex = box;
     let cBox = document.getElementById(`char${GAMESTATE.boxIndex}`);
 
-    if (!CONFIG.charPattern.test(cBox.value) || (GAMESTATE.currentWord.length < 2 && CONFIG.iniciosInvalidos[CONFIG.lang].includes(GAMESTATE.currentWord + cBox.value.toLowerCase()))) {
+    if (!CONFIG.charPattern.test(cBox.value)) {
         document.getElementById(`char-valido`).style.display = 'flex';
         cBox.value = "";
         cBox.disabled = false;
@@ -146,81 +124,13 @@ function novaLetra(box) {
 }
 
 async function verificarPalavra() {
-    console.log(CONFIG.lang)
     async function matchWord() {
-        switch (CONFIG.lang) {
-            case "pt":
-                try {
-                    const variacoes = await gerarVariacoes(GAMESTATE.currentWord);
-                    console.log(variacoes)
-                    for (let word of variacoes) {
-                        const resposta = await fetch(`https://api.dicionario-aberto.net/word/${word}`);
-                        const dados = await resposta.json();
-                        if (dados.length > 0) {
-                            return true; // É um prefixo válido
-                        }
-                    }
-                    return false; // Não é um prefixo válido
-                } catch (error) {
-                    console.error(error);
-                    return false;
-                }
-            case "en":
-                try {
-                    const response = await fetch(`https://api.datamuse.com/words?sp=${encodeURIComponent(GAMESTATE.currentWord)}&max=1`);
-                    const data = await response.json();
-
-                    if (data.length > 0 && data[0].word.toLowerCase() === GAMESTATE.currentWord.toLowerCase()) {
-                    console.log(`The word "${GAMESTATE.currentWord}" exists in Datamuse.`);
-                    return true;
-                    } else {
-                    console.log(`The word "${GAMESTATE.currentWord}" does NOT exist in Datamuse.`);
-                    return false;
-                    }
-                } catch (error) {
-                    console.error('Error checking word:', error);
-                    return false;
-                }
-            default:
-                break;
-        }
+        return CONFIG.dicio[CONFIG.lang][GAMESTATE.currentWord[0].toLowerCase()].some(word => word === (GAMESTATE.currentWord));
     }
 
     async function matchPrefix() {
-        switch (CONFIG.lang) {
-            case "pt":
-                try {
-                    const variacoes = await gerarVariacoes(GAMESTATE.currentWord);
-                    for (let word of variacoes) {
-                        const resposta = await fetch(`https://api.dicionario-aberto.net/prefix/${word}`);
-                        const dados = await resposta.json();
-                        if (dados.length > 0) {
-                            return true; // É um prefixo válido
-                        }
-                    }
-                    return false; // Não é um prefixo válido
-                } catch (error) {
-                    console.error(error);
-                    return false;
-                }
-            case "en":
-                try {
-                    const res = await fetch(`https://api.datamuse.com/words?sp=${GAMESTATE.currentWord}*&max=1`);
-                    if (!res.ok) {
-                    throw new Error('Erro ao consultar Datamuse API');
-                    }
-
-                    const data = await res.json();
-                    
-                    // Se a resposta contém ao menos 1 palavra, o prefixo é válido
-                    return data.length > 0;
-                } catch (err) {
-                    console.error('Erro:', err);
-                    return false; // Em caso de erro, consideramos não válido
-                }
-            default:
-                return true
-        }
+        if (CONFIG.dicio[CONFIG.lang][GAMESTATE.currentWord[0].toLowerCase()].some(word => word.startsWith(GAMESTATE.currentWord))) return true
+        else return CONFIG.dicio[CONFIG.lang]["extra"].some(word => word.startsWith(GAMESTATE.currentWord))
     }
     
     // Verificar se a palavra atual é uma palavra completa (jogador perde)
@@ -239,7 +149,7 @@ async function verificarPalavra() {
     // Verificar se é um prefixo válido (pode continuar)
     const ehPrefixoValido = await matchPrefix();
     
-    if (GAMESTATE.currentWord.length > 2 && !ehPrefixoValido) {
+    if (!ehPrefixoValido) {
         // Não é nem palavra nem prefixo válido - jogador ANTERIOR perde
         const jogadorPerdedor = GAMESTATE.currentPlayer === "red" ? "blue" : "red";
         const vencedor = GAMESTATE.currentPlayer;
@@ -286,11 +196,12 @@ async function vitoriaRound(caso, vencedor) {
         switch (caso) {
             case 1:
                 let previous = GAMESTATE.currentWord.split("").toSpliced(-1).join("");
-                DOM.victoryDetails.innerHTML += `Não é possível continuar a partir de "${GAMESTATE.currentWord}" <br><a id="link-sentido" target="_blank" rel=”noopener noreferrer” href="${CONFIG.lang === "pt" ? `https://www.dicio.com.br/palavras-comecam-${previous}` : `https://www.merriam-webster.com/wordfinder/classic/begins/all/-1/${previous}/1`}">Palavras que começam por "${previous}"</a>`;
+                console.log(CONFIG.links.prefixo[CONFIG.lang] + previous + (CONFIG.lang === "en" ? '/1' : ""))
+                DOM.victoryDetails.innerHTML += `Não é possível continuar a partir de "${GAMESTATE.currentWord}" <br><a id="link-sentido" target="_blank" rel=”noopener noreferrer” href="${CONFIG.links.prefixo[CONFIG.lang] + previous + (CONFIG.lang === "en" ? '/1' : "")}">Palavras que começam por "${previous}"</a>`;
                 document.getElementById("link-sentido").style.color = vencedor === "red" ? CONFIG.colors.red : CONFIG.colors.blue;
                 break;
             case 2:
-                DOM.victoryDetails.innerHTML += `O jogador ${vencedor === "red" ? "azul" : "vermelho"} digitou a palavra <br><a id="link-sentido" target="_blank" rel=”noopener noreferrer” href="${CONFIG.lang === "pt" ? `https://www.dicio.com.br/${GAMESTATE.currentWord}` : `https://dictionary.cambridge.org/dictionary/english/${GAMESTATE.currentWord}`}">"${GAMESTATE.currentWord}"</a>`;
+                DOM.victoryDetails.innerHTML += `O jogador ${vencedor === "red" ? "azul" : "vermelho"} digitou a palavra <br><a id="link-sentido" target="_blank" rel=”noopener noreferrer” href="${CONFIG.links.palavra[CONFIG.lang] + GAMESTATE.currentWord}">"${GAMESTATE.currentWord}"</a>`;
                 document.getElementById("link-sentido").style.color = vencedor === "red" ? CONFIG.colors.red : CONFIG.colors.blue;
                 break;
             case 3:
@@ -366,62 +277,6 @@ function updateCountdownDisplay() {
     }
 }
 
-const caracteresUnicos = {
-  "á": "a",
-  "â": "a",
-  "é": "e",
-  "ê": "e",
-  "í": "i",
-  "ó": "o",
-  "ô": "o",
-  "ú": "u",
-  "ç": "c"
-};
-
-function gerarVariacoes(palavra) {
-  const mapeamento = {
-    a: ['a', 'á', 'â', 'ã'],
-    e: ['e', 'é', 'ê'],
-    i: ['i', 'í'],
-    o: ['o', 'ó', 'ô', 'õ'],
-    u: ['u', 'ú'],
-    c: ['c', 'ç']
-  };
-
-  // Conjunto com os caracteres considerados como acento agudo ou circunflexo.
-  const acentoSet = new Set(['á','â','é','ê','í','ó','ô','ú']);
-
-  // Função recursiva que monta as variações; "acentoUsado" indica se já foi usado um dos acentos restritos.
-  function combinar(subPalavra, indice, acentoUsado) {
-    if (indice === palavra.length) {
-      return [subPalavra];
-    }
-
-    const char = palavra[indice];
-    const alternativas = mapeamento[char] || [char];
-
-    return alternativas.flatMap(letra => {
-      const isAcento = acentoSet.has(letra);
-      // Se já teve um acento agudo/circunflexo e a alternativa atual também for desse tipo,
-      // não a permitimos.
-      if (acentoUsado && isAcento) {
-        return [];
-      }
-      return combinar(subPalavra + letra, indice + 1, acentoUsado || isAcento);
-    });
-  }
-
-  return combinar('', 0, false);
-}
-
-// Exemplo de uso:
-console.log(gerarVariacoes("acao"));
-
-
-// Exemplo de uso:
-console.log(gerarVariacoes("acao")); 
-
-
 // Função que atualiza o atributo lang da página
 function resetGame() {
     const select = document.getElementById('select-lang');
@@ -456,9 +311,18 @@ function mudarTema() {
     }
 }
 
+async function loadWords() {
+    const portugues = await fetch('dicionarios/wordsPT.json');
+    CONFIG.dicio.pt = await portugues.json();
+    
+    const english = await fetch('dicionarios/wordsEN.json');
+    CONFIG.dicio.en = await english.json();
+}
+
 document.addEventListener("DOMContentLoaded", () => {
     let temaSalvo = localStorage.getItem("theme");
     if (temaSalvo) {
-        html.setAttribute("data-theme", temaSalvo);
+        document.documentElement.setAttribute("data-theme", temaSalvo);
     }
+    loadWords();
 });
